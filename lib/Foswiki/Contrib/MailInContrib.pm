@@ -2,7 +2,8 @@
 # Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
 # Copyright (C) 2005 TWiki Contributors. All Rights Reserved.
-# TWiki Contributors are listed in the AUTHORS file in the root
+# Copyright (C) 2008 Foswiki Contributors. All Rights Reserved.
+# Foswiki Contributors are listed in the AUTHORS file in the root
 # of this distribution.
 # NOTE: Please extend that file, not this notice.
 #
@@ -17,10 +18,10 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #
 # As per the GPL, removal of this notice is prohibited.
-package TWiki::Contrib::MailInContrib;
+package Foswiki::Contrib::MailInContrib;
 
 use strict;
-use TWiki;
+use Foswiki;
 
 use Email::Folder;
 use Email::FolderType::Net;
@@ -31,7 +32,7 @@ use Error qw( :try );
 use vars qw ( $VERSION $RELEASE );
 use Carp;
 
-# This should always be $Rev: 10183$ so that TWiki can determine the checked-in
+# This should always be $Rev: 10183$ so that Foswiki can determine the checked-in
 # status of the plugin. It is used by the build automation tools, so
 # you should leave it alone.
 $VERSION = '$Rev: 10183$';
@@ -61,7 +62,7 @@ BEGIN {
 =pod
 
 ---++ ClassMethod new( $session )
-   * =$session= - ref to a TWiki object
+   * =$session= - ref to a Foswiki object
 Construct a new inbox processor.
 
 =cut
@@ -73,7 +74,7 @@ sub new {
     $this->{debug} = $debug;
 
     # Find out when we last processed mail
-    my $workdir = TWiki::Func::getWorkArea('MailInContrib');
+    my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
     if (-e "$workdir/timestamp") {
         open(F, "<$workdir/timestamp") || die $!;
         $this->{lastMailIn} = <F>;
@@ -99,7 +100,7 @@ sub wrapUp {
     my $this = shift;
 
     # re-stamp
-    my $workdir = TWiki::Func::getWorkArea('MailInContrib');
+    my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
     open(F, ">$workdir/timestamp") || die $!;
     print F time(),"\n";
     close(F);
@@ -108,10 +109,10 @@ sub wrapUp {
 sub _getUser {
     my $u = shift;
 
-    if ($TWiki::Plugins::SESSION->{users}->can('getCanonicalUserID')) {
-        return $TWiki::Plugins::SESSION->{users}->getCanonicalUserID($u);
+    if ($Foswiki::Plugins::SESSION->{users}->can('getCanonicalUserID')) {
+        return $Foswiki::Plugins::SESSION->{users}->getCanonicalUserID($u);
     } else {
-        return $TWiki::Plugins::SESSION->{users}->findUser( $u );
+        return $Foswiki::Plugins::SESSION->{users}->findUser( $u );
     }
 }
 
@@ -120,14 +121,14 @@ sub _getUser {
 ---++ ObjectMethod processInbox( $box )
    * =$box= - hash describing the box
 Scan messages in the box that have been received since the last run,
-and process them for inclusion in TWiki topics.
+and process them for inclusion in Foswiki topics.
 
 =cut
 
 sub processInbox {
     my( $this, $box ) = @_;
 
-    $TWiki::Plugins::SESSION = $this->{session};
+    $Foswiki::Plugins::SESSION = $this->{session};
 
     die "No folder specification" unless $box->{folder};
 
@@ -147,7 +148,7 @@ sub processInbox {
     $box->{onSuccess} ||= 'log';
 
     # Load the file of mail templates
-    my $templates = TWiki::Func::loadTemplate( 'MailInContrib' );
+    my $templates = Foswiki::Func::loadTemplate( 'MailInContrib' );
 
     print STDERR "Scanning $box->{folder}\n" if $this->{debug};
     my $mail; # an Email::Simple object
@@ -171,7 +172,7 @@ sub processInbox {
         # Try to get the target topic by
         #    1. examining the "To" address to see if it is a valid web.wikiname (if
         #       enabled in config)
-        #    2. if the subject line starts with a valid TWiki Web.WikiName (if optionally
+        #    2. if the subject line starts with a valid Foswiki Web.WikiName (if optionally
         #       followed by a colon, the rest of the subject line will be ignored)
         #    3. Routing the comment to the spambox if it is enabled
         #    4. Otherwise replying to the user to say "no thanks" if replyonnotopic
@@ -205,12 +206,12 @@ sub processInbox {
         print STDERR "User ",($user||'undefined'),"\n" if( $this->{debug} );
 
         if( $box->{topicPath} =~ /\bto\b/ &&
-              $to =~ /^(?:($TWiki::regex{webNameRegex})\.)($TWiki::regex{wikiWordRegex})@/i) {
+              $to =~ /^(?:($Foswiki::regex{webNameRegex})\.)($Foswiki::regex{wikiWordRegex})@/i) {
             ( $web, $topic ) = ( $1, $2 );
         }
         if( !$topic && $box->{topicPath} =~ /\bsubject\b/ &&
               $subject =~
-                s/^\s*(?:($TWiki::regex{webNameRegex})\.)?($TWiki::regex{wikiWordRegex})(:\s*|\s*$)// ) {
+                s/^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{wikiWordRegex})(:\s*|\s*$)// ) {
             ( $web, $topic ) = ( $1, $2 );
         }
 
@@ -218,7 +219,7 @@ sub processInbox {
 
         print STDERR "Topic $web.",$topic||'',"\n" if $this->{debug};
 
-        unless( TWiki::Func::webExists( $web )) {
+        unless( Foswiki::Func::webExists( $web )) {
             $topic = '';
         }
 
@@ -242,7 +243,7 @@ sub processInbox {
 
         if( $received > $this->{lastMailIn} ) {
             my $err = '';
-            unless( $this->{session}->{store}->webExists( $web )) {
+            unless( Foswiki::Func::webExists( $web )) {
                 $err = "Web $web does not exist";
             } else {
                 my $sender = $mail->header( 'From' ) || 'unknown';
@@ -260,7 +261,7 @@ sub processInbox {
             if( $err ) {
                 $this->_onError(
                     $box, $mail,
-                    "TWiki encountered an error while adding your mail to $web.$topic: $err", \%kill, $num );
+                    "Foswiki encountered an error while adding your mail to $web.$topic: $err", \%kill, $num );
             } else {
                 if( $box->{onSuccess} =~ /\breply\b/ ) {
                     $this->_reply(
@@ -278,7 +279,7 @@ sub processInbox {
 
     eval 'use Email::Delete';
     if( $@ ) {
-        TWiki::writeWarning( "Cannot delete from inbox: $@\n" );
+        Foswiki::writeWarning( "Cannot delete from inbox: $@\n" );
     } else {
         Email::Delete::delete_message
             ( from => $box->{folder},
@@ -303,11 +304,11 @@ sub _onError {
     print STDERR "ERROR: $mess\n" if( $this->{debug} );
 
     if( $box->{onError} =~ /\blog\b/ ) {
-        TWiki::Func::writeWarning( $mess );
+        Foswiki::Func::writeWarning( $mess );
     }
     if( $box->{onError} =~ /\breply\b/ ) {
         $this->_reply( $box, $mail,
-                       "TWiki found an error in your e-mail submission\n\n$mess\n\n".
+                       "Foswiki found an error in your e-mail submission\n\n$mess\n\n".
                          $mail->as_string());
     }
     if( $box->{onError} =~ /\bdelete\b/ ) {
@@ -340,15 +341,17 @@ sub _saveTopic {
     my( $this, $user, $web, $topic, $body, $subject, $attachments ) = @_;
     my $err = '';
 
+    my $curUser = $Foswiki::Plugins::SESSION->{user};
+    $Foswiki::Plugins::SESSION->{user} = $user;
+
     try {
-        my( $meta, $text ) = $this->{session}->{store}->readTopic(
-            $user, $web, $topic );
+        my( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
 
         my $opts;
         if( $text =~ /<!--MAIL(?:{(.*?)})?-->/ ) {
-            $opts = new TWiki::Attrs( $1 );
+            $opts = new Foswiki::Attrs( $1 );
         } else {
-            $opts = new TWiki::Attrs( '' );
+            $opts = new Foswiki::Attrs( '' );
         }
         $opts->{template} ||= 'normal';
         $opts->{where} ||= 'bottom';
@@ -357,7 +360,7 @@ sub _saveTopic {
         # the look and feel of the output pages is to copy
         # MailInContribTemplate as MailInContribUserTemplate and edit to
         # taste. - VickiBrown - 07 Sep 2007
-        my $insert = TWiki::Func::expandTemplate( 'MAILIN:'.$opts->{template} );
+        my $insert = Foswiki::Func::expandTemplate( 'MAILIN:'.$opts->{template} );
         $insert ||= "   * *%SUBJECT%*: %TEXT% _%WIKIUSERNAME% @ %SERVERTIME%_\n";
         $insert =~ s/%SUBJECT%/$subject/g;
         $body =~ s/\r//g;
@@ -366,8 +369,8 @@ sub _saveTopic {
         my $atts = '';
         foreach my $att ( @$attachments ) {
             $attached = 1;
-            $err .= $this->_saveAttachment( $user, $web, $topic, $att );
-            my $tmpl = TWiki::Func::expandTemplate(
+            $err .= $this->_saveAttachment( $web, $topic, $att );
+            my $tmpl = Foswiki::Func::expandTemplate(
                 'MAILIN:'.$opts->{template}.':ATTACHMENT' );
             if( $tmpl ) {
                 $tmpl =~ s/%A_FILE%/$att->{filename}/g;
@@ -379,15 +382,11 @@ sub _saveTopic {
         $insert =~ s/%ATTACHMENTS%/$atts/;
 
         $insert =~ s/%TEXT%/$body/g;
-        my $curUser = $TWiki::Plugins::SESSION->{user};
-        $TWiki::Plugins::SESSION->{user} = $user;
-        $insert = TWiki::Func::expandVariablesOnTopicCreation($insert);
-        $TWiki::Plugins::SESSION->{user} = $curUser;
+        $insert = Foswiki::Func::expandVariablesOnTopicCreation($insert);
 
         # Reload the topic if we added attachments.
         if( $attached ) {
-            ( $meta, $text ) = $this->{session}->{store}->readTopic(
-                $user, $web, $topic );
+            ( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
         }
 
         if( $opts->{where} eq 'top' ) {
@@ -402,29 +401,32 @@ sub _saveTopic {
 
         print STDERR "Save topic $web.$topic:\n$text\n" if( $this->{debug} );
 
-        $this->{session}->{store}->saveTopic(
-            $user, $web, $topic, $text, $meta,
-            { comment => "Submitted by e-mail" } );
+        Foswiki::Func::saveTopic(
+            $web, $topic, $text, $meta,
+            { comment => "Submitted by e-mail",
+              forcenewrevision => 1} );
 
-    } catch TWiki::AccessControlException with {
+    } catch Foswiki::AccessControlException with {
         my $e = shift;
         $err .= $e->stringify();
     } catch Error::Simple with {
         my $e = shift;
         $err .= $e->stringify();
+    } finally {
+        $Foswiki::Plugins::SESSION->{user} = $curUser;
     };
     return $err;
 }
 
 sub _saveAttachment {
-    my( $this, $user, $web, $topic, $attachment ) = @_;
+    my( $this, $web, $topic, $attachment ) = @_;
     my $filename = $attachment->{filename};
     my $payload = $attachment->{payload};
 
     print STDERR "Save attachment $filename\n" if( $this->{debug} );
 
     my $tmpfile = $web.'_'.$topic.'_'.$filename;
-    $tmpfile = $TWiki::cfg{PubDir}.'/'.$tmpfile;
+    $tmpfile = $Foswiki::cfg{PubDir}.'/'.$tmpfile;
 
     $tmpfile .= 'X' while -e $tmpfile;
     open( TF, ">$tmpfile" ) || return 'Could not write '.$tmpfile;
@@ -433,12 +435,12 @@ sub _saveAttachment {
 
     my $err = '';
     # SMELL: no central way to process attachment filenames, so we
-    # have to copy-paste the TWiki core code.
+    # have to copy-paste the Foswiki core code.
     $filename =~ s/ /_/go;
-    $filename =~ s/$TWiki::cfg{NameFilter}//goi;
-    $filename =~ s/$TWiki::cfg{UploadFilter}/$1\.txt/goi;
-    $this->{session}->{store}->saveAttachment(
-        $web, $topic, $filename, $user,
+    $filename =~ s/$Foswiki::cfg{NameFilter}//goi;
+    $filename =~ s/$Foswiki::cfg{UploadFilter}/$1\.txt/goi;
+    Foswiki::Func::saveAttachment(
+        $web, $topic, $filename,
         { comment => "Submitted by e-mail", file => $tmpfile });
     unlink( $tmpfile );
     return $err;
@@ -454,13 +456,11 @@ sub _reply {
     my $message =
       "To: $addressee" .
         "\nFrom: ".$mail->header('To').
-          "\nSubject: RE: your TWiki submission to ".$mail->header('Subject').
+          "\nSubject: RE: your Foswiki submission to ".$mail->header('Subject').
             "\n\n$body\n";
-    eval {
-        $TWiki::Plugins::SESSION->{net}->sendEmail( $message, 5 );
-    };
-    if ($@) {
-        print "Failed trying to send mail: $@\n";
+    my $errors = Foswiki::Func::sendEmail( $message, 5 );
+    if ($errors) {
+        print "Failed trying to send mail: $errors\n";
     }
 }
 

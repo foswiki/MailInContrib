@@ -3,7 +3,8 @@
 # Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
 # Copyright (C) 2005 TWiki Contributors. All Rights Reserved.
-# TWiki Contributors are listed in the AUTHORS file in the root
+# Copyright (C) 2008 Foswiki Contributors. All Rights Reserved.
+# Foswiki Contributors are listed in the AUTHORS file in the root
 # of this distribution.
 # NOTE: Please extend that file, not this notice.
 #
@@ -25,7 +26,7 @@ BEGIN {
     require 'setlib.cfg';
 }
 
-use TWiki::Contrib::MailInContrib;
+use Foswiki::Contrib::MailInContrib;
 
 my $debug;
 if( $ENV{'DOCUMENT_ROOT'} ) {
@@ -42,18 +43,9 @@ if( $ENV{'DOCUMENT_ROOT'} ) {
     $debug = ( $args =~ /\bdebug\b/ );
 }
 
-my $twiki;
-my $folders;
-if( eval 'defined($TWiki::wikiversion)' ) {
-    TWiki::initialize();
-    $twiki = undef;
-    eval "use LocalSite.cfg";
-} else {
-    $twiki = new TWiki();
-    $TWiki::Plugins::SESSION = $twiki;
-}
-$folders = $TWiki::cfg{MailInContrib};
-my $processor = new TWiki::Contrib::MailInContrib($twiki, $debug);
+my $session = new Foswiki();
+my $folders = $Foswiki::cfg{MailInContrib};
+my $processor = new Foswiki::Contrib::MailInContrib($session, $debug);
 foreach my $folder ( @$folders ) {
     $processor->processInbox( $folder );
 }

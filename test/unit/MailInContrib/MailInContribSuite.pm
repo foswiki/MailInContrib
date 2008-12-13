@@ -1,14 +1,13 @@
 use strict;
 
 package MailInContribSuite;
+use base 'FoswikiFnTestCase';
 
-use base qw( FoswikiFnTestCase! );
-
-use TWiki;
+use Foswiki;
 use Error qw( :try );
 use File::Path;
 use Error qw( :try );
-use TWiki::Contrib::MailInContrib;
+use Foswiki::Contrib::MailInContrib;
 
 my $box;
 
@@ -22,17 +21,19 @@ sub set_up {
     $this->{system_web} = 'TemporaryMailInContribSuiteSystemWeb';
     $this->{twiki}->{store}->createWeb(
         $this->{twiki}->{user}, $this->{system_web},
-        $TWiki::cfg{SystemWebName} );
+        $Foswiki::cfg{SystemWebName} );
+    my $adm = Foswiki::Func::getCanonicalUserID(
+        $Foswiki::cfg{AdminUserWikiName});
     $this->{twiki}->{store}->saveTopic(
-        $TWiki::cfg{AdminUserWikiName}, $this->{system_web},
+        $adm, $this->{system_web},
         'WebPreferences', "");
 
-    $TWiki::cfg{SystemWebName} = $this->{system_web};
+    $Foswiki::cfg{SystemWebName} = $this->{system_web};
 
     $this->{twiki}->finish();
-    $this->{twiki} = new TWiki();
+    $this->{twiki} = new Foswiki();
 
-    my $workdir = TWiki::Func::getWorkArea('MailInContrib');
+    my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
     open(F, ">$workdir/timestamp") || die $!;
     print F "0\n";
     close(F);
@@ -49,11 +50,10 @@ sub set_up {
         $this->{test_topic}, "");
 
     $this->{twiki}->finish();
-    $this->{twiki} = new TWiki();
+    $this->{twiki} = new Foswiki();
     $this->{twiki}->net->setMailHandler(\&sentMail);
 
     $box = {};
-
     # Make a maildir
     my $tmp = "/tmp/mail$$";
     File::Path::mkpath("$tmp/tmp");
@@ -61,7 +61,7 @@ sub set_up {
     File::Path::mkpath("$tmp/new");
     $box->{folder} = "$tmp/";
 
-    $TWiki::cfg{MailInContrib} = [ $box ];
+    $Foswiki::cfg{MailInContrib} = [ $box ];
     @mails = ();
 }
 
@@ -93,7 +93,7 @@ sub sentMail {
 
 sub cron {
     my $this = shift;
-    my $min = new TWiki::Contrib::MailInContrib( $this->{twiki}, 0 );
+    my $min = new Foswiki::Contrib::MailInContrib( $this->{twiki}, 0 );
     $min->processInbox( $box );
     $min->wrapUp();
     return $min;
@@ -118,7 +118,7 @@ HERE
 From: notauser@example.com
 and there is no valid default username', $c->{error});
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},$this->{test_topic});
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},$this->{test_topic});
 
     $this->assert($t !~ /\S/, $t);
     $this->assert_equals(0, scalar(@mails));
@@ -153,7 +153,7 @@ HERE
     my $c = $this->cron();
     $this->assert_null($c->{error});
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},$this->{test_topic});
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},$this->{test_topic});
 
     $this->assert($t =~ s/^ *\* \*$this->{test_web}\.NotHere\*: Message 1 text here\s*-- $this->{users_web}\.MoleInnaHole -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+\n//m, $t);
     $this->assert($t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: Message 2 text here\s*-- $this->{users_web}\.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+\n//m, $t);
@@ -189,7 +189,7 @@ HERE
     my $c = $this->cron();
     $this->assert_null($c->{error});
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},$this->{test_topic});
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},$this->{test_topic});
 
     $this->assert($t =~ s/^\s*\* \*\*: Message 1 text here\s* -- $this->{users_web}\.MoleInnaHole -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+$//m, $t);
     $this->assert($t =~ s/^ *\* \*SPAM\*: Message 2 text here\s*-- $this->{users_web}\.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+$//m);
@@ -222,7 +222,7 @@ HERE
     my $c = $this->cron();
     $this->assert_null($c->{error});
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},'DangleBerries');
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},'DangleBerries');
 
     $t =~ s/\* \*no valid topic\*: Message 1 text here\s*-- $this->{users_web}.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+//s;
     $this->assert_matches(qr/^\s*$/, $t);
@@ -366,15 +366,16 @@ HERE
     $box->{onSuccess} = 'reply';
     my $c = $this->cron();
 
+print STDERR "VBLO\n";
     $this->assert_equals(1, scalar(@mails));
     $this->assert_matches(qr/Thank you for your successful/, $mails[0]);
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},'AnotherTopic');
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},'AnotherTopic');
     my @a = $m->get('FILEATTACHMENT');
     $this->assert_equals(1, scalar(@a));
     $this->assert_str_equals("data.asc", $a[0]->{attachment});
 
-    $this->assert(-e "$TWiki::cfg{PubDir}/$this->{test_web}/AnotherTopic/data.asc");
+    $this->assert(-e "$Foswiki::cfg{PubDir}/$this->{test_web}/AnotherTopic/data.asc");
 }
 
 # templates
@@ -394,7 +395,7 @@ HERE
     $box->{topicPath} = 'to';
     $box->{onSuccess} = 'reply delete';
     $this->{twiki}->{store}->saveTopic(
-        $this->{twiki}->{user}, $TWiki::cfg{SystemWebName},
+        $this->{twiki}->{user}, $Foswiki::cfg{SystemWebName},
         'MailInContribUserTemplate', <<'HERE');
 %TMPL:DEF{MAILIN:wierd}%
 Subject: %SUBJECT%
@@ -413,7 +414,7 @@ HERE
     $this->assert_equals(1, scalar(@mails));
     $this->assert_matches(qr/Thank you for your successful/, $mails[0]);
 
-    my( $m, $t ) = TWiki::Func::readTopic($this->{test_web},'TargetTopic');
+    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},'TargetTopic');
 
     $this->assert_matches(qr/BEGIN\s*Subject: Object\s*Body: Message 1 text here\s*<!--MAIL{/s, $t);
 }
