@@ -63,7 +63,7 @@
 #   specify a full web.topicname
 #  </li>
 # </ul>
-$TWiki::cfg{MailInContrib} = [
+$Foswiki::cfg{MailInContrib} = [
  {
    folder => 'pop://example_user:password@example.com/Inbox',
    onError => 'log',

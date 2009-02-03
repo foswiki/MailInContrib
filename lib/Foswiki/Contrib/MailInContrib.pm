@@ -1,11 +1,13 @@
 #
 # Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2005 TWiki Contributors. All Rights Reserved.
-# Copyright (C) 2008 Foswiki Contributors. All Rights Reserved.
+# Copyright (C) 2009 Foswiki Contributors. All Rights Reserved.
 # Foswiki Contributors are listed in the AUTHORS file in the root
-# of this distribution.
-# NOTE: Please extend that file, not this notice.
+# of this distribution. NOTE: Please extend that file, not this notice.
+#
+# Additional copyrights apply to some or all of the code in this module
+# as follows:
+# Copyright (C) 2005 TWiki Contributors. All Rights Reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -22,6 +24,7 @@ package Foswiki::Contrib::MailInContrib;
 
 use strict;
 use Foswiki;
+use Assert;
 
 use Email::Folder;
 use Email::FolderType::Net;
@@ -163,17 +166,18 @@ sub processInbox {
                 $received = $receipt if $receipt > $received;
             }
         }
-        unless ($received) {
+        if (!$received && $mail->header('Date')) {
             # Use the send date
             $received = Time::ParseDate::parsedate($mail->header('Date'));
         }
         $received ||= time();
 
         # Try to get the target topic by
-        #    1. examining the "To" address to see if it is a valid web.wikiname (if
-        #       enabled in config)
-        #    2. if the subject line starts with a valid Foswiki Web.WikiName (if optionally
-        #       followed by a colon, the rest of the subject line will be ignored)
+        #    1. examining the "To" and "cc" addresses to see if either has
+        #       a valid web.wikiname (if enabled in config)
+        #    2. if the subject line starts with a valid Foswiki Web.WikiName
+        #       (if optionally followed by a colon, the rest of the subject
+        #       line will be ignored)
         #    3. Routing the comment to the spambox if it is enabled
         #    4. Otherwise replying to the user to say "no thanks" if replyonnotopic
         my( $web, $topic, $user );
@@ -190,8 +194,15 @@ sub processInbox {
         if( $targets && scalar(@$targets)) {
             $user = $targets->[0];
         }
-        my $to = $mail->header('To');
-        $to =~ s/^.*<(.*)>.*$/$1/;
+
+        my @to = split(/,\s*/, $mail->header('To') || '');
+        if (defined $mail->header('CC')) {
+            push(@to, split(/,\s*/, $mail->header('CC')));
+        }
+        # Use the address in the <> if there is one
+        @to = map { /^.*<(.*)>.*$/ ? $1 : $_; } @to;
+        print STDERR "Targets: ", join(' ', @to),"\n" if $this->{debug};
+        print STDERR "Subject: $subject\n" if $this->{debug};
 
         unless( $user ) {
             unless( $box->{user} && ($user = _getUser( $box->{user} ))) {
@@ -203,16 +214,32 @@ sub processInbox {
             }
         }
 
-        print STDERR "User ",($user||'undefined'),"\n" if( $this->{debug} );
+        print STDERR "User is '",($user||'undefined'),"'\n"
+          if( $this->{debug} );
 
-        if( $box->{topicPath} =~ /\bto\b/ &&
-              $to =~ /^(?:($Foswiki::regex{webNameRegex})\.)($Foswiki::regex{wikiWordRegex})@/i) {
-            ( $web, $topic ) = ( $1, $2 );
+        # See if we can get a valid web.topic out of to: or cc:
+        if( $box->{topicPath} =~ /\bto\b/) {
+            foreach my $target (@to) {
+                next unless $target =~ /^(?:($Foswiki::regex{webNameRegex})\.)($Foswiki::regex{topicNameRegex})\@/i;
+                my ($guessweb, $guesstopic) =
+                  Foswiki::Func::normalizeWebTopicName(
+                      ($1 || $box->{defaultWeb}), $2);
+                if (Foswiki::Func::topicExists($guessweb, $guesstopic)) {
+                    # Found an existing topic
+                    ($web, $topic) = ($guessweb, $guesstopic);
+                    last;
+                }
+            }
         }
+
+        # If we didn't get the name of an existing topic from the
+        # To: or CC:, use the Subject:
         if( !$topic && $box->{topicPath} =~ /\bsubject\b/ &&
               $subject =~
-                s/^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{wikiWordRegex})(:\s*|\s*$)// ) {
-            ( $web, $topic ) = ( $1, $2 );
+                /^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$)/ ) {
+            ($web, $topic) = Foswiki::Func::normalizeWebTopicName(
+                ($1 || $box->{defaultWeb}), $2);
+            # This time the topic doesn't have to exist
         }
 
         $web ||= $box->{defaultWeb};
@@ -401,8 +428,9 @@ sub _saveTopic {
 
         print STDERR "Save topic $web.$topic:\n$text\n" if( $this->{debug} );
 
+        ASSERT(!$meta || $meta->isa('Foswiki::Meta')) if DEBUG;
         Foswiki::Func::saveTopic(
-            $web, $topic, $text, $meta,
+            $web, $topic, $meta, $text,
             { comment => "Submitted by e-mail",
               forcenewrevision => 1} );
 

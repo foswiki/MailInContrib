@@ -155,8 +155,18 @@ HERE
 
     my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},$this->{test_topic});
 
-    $this->assert($t =~ s/^ *\* \*$this->{test_web}\.NotHere\*: Message 1 text here\s*-- $this->{users_web}\.MoleInnaHole -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+\n//m, $t);
-    $this->assert($t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: Message 2 text here\s*-- $this->{users_web}\.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+\n//m, $t);
+    $this->assert(0, $t) unless
+      $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^Message 1 text here\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: //s;
+    $this->assert(0, $t) unless
+      $t =~ s/^Message 2 text here\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
 
     $this->assert_matches(qr/^\s*$/, $t);
     $this->assert_equals(0, scalar(@mails));
@@ -187,13 +197,22 @@ HERE
     $this->sendTestMail($mail);
     $box->{topicPath} = 'subject';
     my $c = $this->cron();
-    $this->assert_null($c->{error});
+    if ($c->{error}) {
+        print STDERR $c->{error},"\n";
+        $this->assert_null($c->{error});
+    }
 
-    my( $m, $t ) = Foswiki::Func::readTopic($this->{test_web},$this->{test_topic});
+    my( $m, $t ) = Foswiki::Func::readTopic(
+        $this->{test_web}, $this->{test_topic});
 
-    $this->assert($t =~ s/^\s*\* \*\*: Message 1 text here\s* -- $this->{users_web}\.MoleInnaHole -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+$//m, $t);
-    $this->assert($t =~ s/^ *\* \*SPAM\*: Message 2 text here\s*-- $this->{users_web}\.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+$//m);
-
+    $this->assert(0, $t) unless
+      $t =~ s/^\s*\* \*$this->{test_web}.$this->{test_topic}\*: Message 1 text here\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^\s*\*\s*\*$this->{test_web}.$this->{test_topic}: SPAM\*: Message 2 text here\s*//s;
+    $this->assert(0, $t) unless
+      $t =~ s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches(qr/^\s*$/, $t);
     $this->assert_equals(0, scalar(@mails));
 }
@@ -296,7 +315,7 @@ Date: Mon, 27 Feb 2006 00:33:58 -0800
 From: "Ally Gator" <ally@masai.mara>
 To: "Dick Head" <dhead@twiki.com>
 Subject: $this->{test_web}.AnotherTopic: attachment test
-Cc: another.idiot@twiki.com>
+Cc: another.idiot@twiki.com
 MIME-Version: 1.0
 Content-Type: multipart/mixed; 
 	boundary="----=_Part_21658_5579231.1141029238540"
@@ -366,7 +385,6 @@ HERE
     $box->{onSuccess} = 'reply';
     my $c = $this->cron();
 
-print STDERR "VBLO\n";
     $this->assert_equals(1, scalar(@mails));
     $this->assert_matches(qr/Thank you for your successful/, $mails[0]);
 

@@ -40,10 +40,21 @@ Attachments to the mail get treated as attachments by Foswiki, and attached to t
 Note that =mailincron= will only process messages that have arrived since the last time it ran. So if there was an error adding a mail, it won't attempt to add it again even if it is still in the inbox.
 
 ---+ Where the mail gets added
-The target topic for a mail is normally specified in the =Subject:= of the mail. You just put Web.Topic as the first thing on the subject line, optionally followed by a colon and other subject text. Alternatively you can configure the module to examine the =To:= field in the mail and get the topic name from there instead.
-   * If a topic is specified, but doesn't exist, it will be created.
-   * If there is no web name specified, then you can configure a default web to accept those mails.
-   * If a non-existant web is specified, then it is an error.
+By default the target topic for mail is specified in the =Subject:= of the mail. You just put Web.Topic as the first thing on the subject line, optionally followed by a colon and other subject text. If there is no web name specified, then you can configure a default web to accept those mails.
+   * A mail with a subject of =Schedule.MyClass= will be saved to Schedule.<nop>MyClass
+   * =Subject: Schedule.MyClass: timetable= will be saved to Schedule.<nop>MyClass
+   * =Subject: MyClass= will be saved to &lt;default web>.<nop>MyClass. 
+   * =Subject: MyClass: timetable= will be saved to &lt;default web>.<nop>MyClass, if the default web is set as =Schedule=. 
+   * If a topic specified on the =Subject:= line doesn't exist, it will be created.
+
+You can also configure the module to examine the =To:= and =CC:= fields in the mail, and get the name of an existing topic from there instead.
+   * If a non-existant topic is specified, then it is an error.
+   * The first valid, existing topic found in the =To:= or =CC:= fields is taken, and overrides the =Subject:=.
+   * A mail addressed to =&lt;MyTopic@example.com>= will be saved in &lt;default web>.MyTopic
+   * A mail addressed to =&lt;Schedule.MyTopic@example.com>= will be saved in Schedule.<nop>MyTopic
+   * A mail addressed to ="Mylene Classe" &lt;Schedule.MyClass<nop>@example.com>= will be saved in Schedule.<nop>MyTopic
+   * A mail addressed to ="Mylene Classe" &lt;MyClass<nop>@example.com>= will be saved in &lt;default web>.<nop>MyTopic
+
 You can also define a 'spambox' for each mail folder. A spambox is a topic that will take all messages that do _not_ have a valid topic.
 
 The module can use special HTML comments in the topic to decide where to insert new emails within the text.
@@ -86,20 +97,21 @@ Make sure that the cron is run by a user with the permissions needed to read and
 
 ---++ Contrib Info
 
-Another great Foswiki extension from the <a style="text-decoration:none" href="http://wikiring.com"><img src="%ATTACHURLPATH%/wikiringlogo20x20.png" alt="" /> *WikiRing* </a> - working together to improve your wiki experience!
+Another great Foswiki extension from the <a style="text-decoration:none" href="http://wikiring.com"><img src="%ATTACHURLPATH%/wikiringlogo20x20.png" alt="" /> *WikiRing* </a> - *working together to improve your wiki experience!*
 
 Many thanks to the following sponsors for supporting this work:
    * [[http://www.evolvedmedianetwork.com][Evolved Media Network]]
 
 |  Author: | Foswiki:Main.CrawfordCurrie (http://c-dot.co.uk) |
-|  Copyright &copy;: | 2005, TWiki Contributors; 2008 Foswiki Contributors |
+|  Copyright &copy;: | 2005, TWiki Contributors<br />2008-2009 Foswiki Contributors |
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Dependencies: | %$DEPENDENCIES% |
 |  Version: | %$VERSION% |
 | Change History: | |
-|  1 Aug 2008 | Bugs:Item5450: minor doc fix |
-|  8 Sep 2007 | Bugs:Item4575 various ideas from Dev topic, tested against 4.2.0 |
-|  12412 | Fixed Bugs:Item3334 by removing dependency on !FuncUsersContrib |
+|  3 Feb 2009 | Foswikitask:Item456: ported to Foswiki Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
+|  1 Aug 2008 | TWikibug:Item5450: minor doc fix |
+|  8 Sep 2007 | TWikibug:Item4575 various ideas from Dev topic, tested against 4.2.0 |
+|  12412 | Fixed TWikibug:Item3334 by removing dependency on !FuncUsersContrib |
 |  10239 | Added support for listing attachments in-line with the mail |
 |  10182 | Fixed parser failures on multipart MIME messages |
 |  10111 | Fixed problem with spaces in attachment names |
