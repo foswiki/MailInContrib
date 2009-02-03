@@ -19,13 +19,13 @@ The implementation is very simple; a script called =mailincron= is run every so 
 
 For example, your wayward child might send a mail like this from an internet cafe in Thailand:
 <verbatim>
-To: twiki@mum_and_dad.org.uk
+To: foswiki@mum_and_dad.org.uk
 From: gapper@isp.co.uk
 Subject: Travels.DailyDiary: cashless
 
 *Phuket*: I've run out of money!
 </verbatim>
-The message lands in your email folder at your ISP. Once an hour, a cron job runs the =mailincron= script, which scans the folder. If it finds any messages that have nothing but a correctly formatted Web.Topic<nop>Name in the subject line, that topic is appended to (created) with the plain text of the email.  The Web must exist, though the topic will be created if necessary. Both web and topic _must_ be specified.
+The message lands in your email folder at your ISP. Once an hour, a cron job runs the =mailincron= script, which scans the folder. If it finds any messages that have nothing but a correctly formatted Web.Topic<nop>Name in the subject line, that topic is appended to (created) with the plain text of the email.  The Web must exist, though the topic can be created if necessary.
 
 In our example, the web exists, and so does the topic, so the following text gets appended to Travels.Daily<nop>Diary:
 <div style='background: #EEFFEE'>
@@ -41,15 +41,15 @@ Note that =mailincron= will only process messages that have arrived since the la
 
 ---+ Where the mail gets added
 By default the target topic for mail is specified in the =Subject:= of the mail. You just put Web.Topic as the first thing on the subject line, optionally followed by a colon and other subject text. If there is no web name specified, then you can configure a default web to accept those mails.
-   * A mail with a subject of =Schedule.MyClass= will be saved to Schedule.<nop>MyClass
-   * =Subject: Schedule.MyClass: timetable= will be saved to Schedule.<nop>MyClass
-   * =Subject: MyClass= will be saved to &lt;default web>.<nop>MyClass. 
-   * =Subject: MyClass: timetable= will be saved to &lt;default web>.<nop>MyClass, if the default web is set as =Schedule=. 
+   * A mail with a =Subject:= of =Schedule.<nop>MyClass= will be saved to Schedule.<nop>MyClass
+   * =Subject: Schedule.<nop>MyClass: timetable= will be saved to Schedule.<nop>MyClass
+   * =Subject: <nop>MyClass= will be saved to &lt;default web>.<nop>MyClass. 
+   * =Subject: <nop>MyClass: timetable= will be saved to &lt;default web>.<nop>MyClass, if the default web is set as =Schedule=. 
    * If a topic specified on the =Subject:= line doesn't exist, it will be created.
 
 You can also configure the module to examine the =To:= and =CC:= fields in the mail, and get the name of an existing topic from there instead.
-   * If a non-existant topic is specified, then it is an error.
-   * The first valid, existing topic found in the =To:= or =CC:= fields is taken, and overrides the =Subject:=.
+   * If a non-existant topic is specified in =To:= or =CC:= then it is ignored.
+   * The valid, existing topic found in the =To:= or =CC:= fields is taken, and overrides the =Subject:=.
    * A mail addressed to =&lt;MyTopic@example.com>= will be saved in &lt;default web>.MyTopic
    * A mail addressed to =&lt;Schedule.MyTopic@example.com>= will be saved in Schedule.<nop>MyTopic
    * A mail addressed to ="Mylene Classe" &lt;Schedule.MyClass<nop>@example.com>= will be saved in Schedule.<nop>MyTopic
@@ -70,7 +70,7 @@ Any attachments in the mail get added to the target topic as attachments. Attach
 ---+ How the contributor is identified
 The user identity is used for access control checks on the target topic, so you can use Foswiki access controls to protect target topics.
 
-You can configure the module to look at the =From:= entry in the email, and if a registered user has set that email (see ChangeEmailAddress), then they are identified as the contributor. Note that there is a security risk here, as the =From:= address in e-mail can easily be spoofed.
+You can configure the module to look at the =From:= entry in the email, and if a registered user has set that email (see %SYSTEMWEB%.ChangeEmailAddress), then they are identified as the contributor. Note that there is a security risk here, as the =From:= address in e-mail can easily be spoofed.
 
 You can also optionally set a default user for an inbox, so if the user can't be identified from the mail, it will fall back to the default.
 
@@ -90,7 +90,7 @@ The =mailincron= script takes one optional parameter, <tt>debug</tt>, which take
 
 To run the script you need to set up a cron job. For example, to transfer mail into the wiki once every hour you might write:
 <verbatim>
-0 * * * * cd /home/twiki/bin && ../tools/mailincron 2>&1 >> /home/twiki/logs/mailincron.log
+0 * * * * cd /home/foswiki/bin && ../tools/mailincron 2>&1 >> /home/foswiki/logs/mailincron.log
 </verbatim>
 You _must_ run the script from the bin directory.
 Make sure that the cron is run by a user with the permissions needed to read and write the =data= directory.
