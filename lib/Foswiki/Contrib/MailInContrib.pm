@@ -32,30 +32,24 @@ use Email::MIME;
 use Email::Delete;
 use Time::ParseDate;
 use Error qw( :try );
-use vars qw ( $VERSION $RELEASE );
 use Carp;
 
-# This should always be $Rev: 10183$ so that Foswiki can determine the checked-in
-# status of the plugin. It is used by the build automation tools, so
-# you should leave it alone.
-$VERSION = '$Rev: 10183$';
-
-# This is a free-form string you can use to "name" your own plugin version.
-# It is *not* used by the build automation tools, but is reported as part
-# of the version number in PLUGINDESCRIPTIONS.
-$RELEASE = 'Dakar';
+our $VERSION = '$Rev: 10183$';
+our $RELEASE = '22 Jul 2009';
+our $SHORTDESCRIPTION = 'Supports submissions to Foswiki via e-mail';
 
 BEGIN {
     $SIG{__DIE__} = sub { Carp::confess $_[0] };
 }
 
 {
+
     package MIMEFolder;
 
     use base qw/Email::Folder/;
 
     sub bless_message {
-        my $self    = shift;
+        my $self = shift;
         my $message = shift || die "You must pass a message\n";
 
         return Email::MIME->new($message);
@@ -71,19 +65,20 @@ Construct a new inbox processor.
 =cut
 
 sub new {
-    my( $class, $session, $debug ) = @_;
-    my $this = bless({}, $class);
+    my ( $class, $session, $debug ) = @_;
+    my $this = bless( {}, $class );
     $this->{session} = $session;
-    $this->{debug} = $debug;
+    $this->{debug}   = $debug;
 
     # Find out when we last processed mail
     my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
-    if (-e "$workdir/timestamp") {
-        open(F, "<$workdir/timestamp") || die $!;
+    if ( -e "$workdir/timestamp" ) {
+        open( F, "<$workdir/timestamp" ) || die $!;
         $this->{lastMailIn} = <F>;
-        chomp($this->{lastMailIn});
+        chomp( $this->{lastMailIn} );
         close(F);
-    } else {
+    }
+    else {
         $this->{lastMailIn} = 0;
     }
 
@@ -104,18 +99,19 @@ sub wrapUp {
 
     # re-stamp
     my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
-    open(F, ">$workdir/timestamp") || die $!;
-    print F time(),"\n";
+    open( F, ">$workdir/timestamp" ) || die $!;
+    print F time(), "\n";
     close(F);
 }
 
 sub _getUser {
     my $u = shift;
 
-    if ($Foswiki::Plugins::SESSION->{users}->can('getCanonicalUserID')) {
+    if ( $Foswiki::Plugins::SESSION->{users}->can('getCanonicalUserID') ) {
         return $Foswiki::Plugins::SESSION->{users}->getCanonicalUserID($u);
-    } else {
-        return $Foswiki::Plugins::SESSION->{users}->findUser( $u );
+    }
+    else {
+        return $Foswiki::Plugins::SESSION->{users}->findUser($u);
     }
 }
 
@@ -129,13 +125,13 @@ and process them for inclusion in Foswiki topics.
 =cut
 
 sub processInbox {
-    my( $this, $box ) = @_;
+    my ( $this, $box ) = @_;
 
     $Foswiki::Plugins::SESSION = $this->{session};
 
     die "No folder specification" unless $box->{folder};
 
-    my $ftype = Email::FolderType::folder_type($box->{folder});
+    my $ftype = Email::FolderType::folder_type( $box->{folder} );
     print STDERR "Process $ftype folder $box->{folder}\n" if $this->{debug};
 
     my $folder = new MIMEFolder( $box->{folder} );
@@ -144,89 +140,98 @@ sub processInbox {
     my %kill;
 
     # Set defaults if necessary
-    $box->{topicPath} ||= 'subject';
+    $box->{topicPath}  ||= 'subject';
     $box->{defaultWeb} ||= '';
-    $box->{onNoTopic} ||= 'error';
-    $box->{onError} ||= 'log';
-    $box->{onSuccess} ||= 'log';
+    $box->{onNoTopic}  ||= 'error';
+    $box->{onError}    ||= 'log';
+    $box->{onSuccess}  ||= 'log';
 
     # Load the file of mail templates
-    my $templates = Foswiki::Func::loadTemplate( 'MailInContrib' );
+    my $templates = Foswiki::Func::loadTemplate('MailInContrib');
 
     print STDERR "Scanning $box->{folder}\n" if $this->{debug};
-    my $mail; # an Email::Simple object
-    my $num = -1; # message number
-    while( ($mail = $folder->next_message()) ) {
+    my $mail;    # an Email::Simple object
+    my $num = -1;    # message number
+    while ( ( $mail = $folder->next_message() ) ) {
         $num++;
 
         my $received = 0;
-        foreach my $receipt ($mail->header('Received')) {
-            if( $receipt =~ /; (.*?)$/ ) {
-                $receipt = Time::ParseDate::parsedate( $1 );
+        foreach my $receipt ( $mail->header('Received') ) {
+            if ( $receipt =~ /; (.*?)$/ ) {
+                $receipt = Time::ParseDate::parsedate($1);
                 $received = $receipt if $receipt > $received;
             }
         }
-        if (!$received && $mail->header('Date')) {
+        if ( !$received && $mail->header('Date') ) {
+
             # Use the send date
-            $received = Time::ParseDate::parsedate($mail->header('Date'));
+            $received = Time::ParseDate::parsedate( $mail->header('Date') );
         }
         $received ||= time();
 
-        # Try to get the target topic by
-        #    1. examining the "To" and "cc" addresses to see if either has
-        #       a valid web.wikiname (if enabled in config)
-        #    2. if the subject line starts with a valid Foswiki Web.WikiName
-        #       (if optionally followed by a colon, the rest of the subject
-        #       line will be ignored)
-        #    3. Routing the comment to the spambox if it is enabled
-        #    4. Otherwise replying to the user to say "no thanks" if replyonnotopic
-        my( $web, $topic, $user );
+     # Try to get the target topic by
+     #    1. examining the "To" and "cc" addresses to see if either has
+     #       a valid web.wikiname (if enabled in config)
+     #    2. if the subject line starts with a valid Foswiki Web.WikiName
+     #       (if optionally followed by a colon, the rest of the subject
+     #       line will be ignored)
+     #    3. Routing the comment to the spambox if it is enabled
+     #    4. Otherwise replying to the user to say "no thanks" if replyonnotopic
+        my ( $web, $topic, $user );
 
         my $subject = $mail->header('Subject');
 
         my $from = $mail->header('From');
 
-        print STDERR "Message from $from: ",$mail->header('Subject'),"\n"
+        print STDERR "Message from $from: ", $mail->header('Subject'), "\n"
           if $this->{debug};
 
         $from =~ s/^.*<(.*)>.*$/$1/;
-        my $targets = $this->{session}->{users}->findUserByEmail( $from );
-        if( $targets && scalar(@$targets)) {
+        my $targets = $this->{session}->{users}->findUserByEmail($from);
+        if ( $targets && scalar(@$targets) ) {
             $user = $targets->[0];
         }
 
-        my @to = split(/,\s*/, $mail->header('To') || '');
-        if (defined $mail->header('CC')) {
-            push(@to, split(/,\s*/, $mail->header('CC')));
+        my @to = split( /,\s*/, $mail->header('To') || '' );
+        if ( defined $mail->header('CC') ) {
+            push( @to, split( /,\s*/, $mail->header('CC') ) );
         }
+
         # Use the address in the <> if there is one
         @to = map { /^.*<(.*)>.*$/ ? $1 : $_; } @to;
-        print STDERR "Targets: ", join(' ', @to),"\n" if $this->{debug};
+        print STDERR "Targets: ", join( ' ', @to ), "\n" if $this->{debug};
         print STDERR "Subject: $subject\n" if $this->{debug};
 
-        unless( $user ) {
-            unless( $box->{user} && ($user = _getUser( $box->{user} ))) {
+        unless ($user) {
+            unless ( $box->{user} && ( $user = _getUser( $box->{user} ) ) ) {
                 $this->_onError(
-                    $box, $mail, 'Could not determine submitters WikiName from'.
-                      "\nFrom: $from\nand there is no valid default username",
-                    \%kill, $num );
+                    $box,
+                    $mail,
+                    'Could not determine submitters WikiName from'
+                      . "\nFrom: $from\nand there is no valid default username",
+                    \%kill,
+                    $num
+                );
                 next;
             }
         }
 
-        print STDERR "User is '",($user||'undefined'),"'\n"
-          if( $this->{debug} );
+        print STDERR "User is '", ( $user || 'undefined' ), "'\n"
+          if ( $this->{debug} );
 
         # See if we can get a valid web.topic out of to: or cc:
-        if( $box->{topicPath} =~ /\bto\b/) {
+        if ( $box->{topicPath} =~ /\bto\b/ ) {
             foreach my $target (@to) {
-                next unless $target =~ /^(?:($Foswiki::regex{webNameRegex})\.)($Foswiki::regex{topicNameRegex})\@/i;
-                my ($guessweb, $guesstopic) =
+                next
+                  unless $target =~
+/^(?:($Foswiki::regex{webNameRegex})\.)($Foswiki::regex{topicNameRegex})\@/i;
+                my ( $guessweb, $guesstopic ) =
                   Foswiki::Func::normalizeWebTopicName(
-                      ($1 || $box->{defaultWeb}), $2);
-                if (Foswiki::Func::topicExists($guessweb, $guesstopic)) {
+                    ( $1 || $box->{defaultWeb} ), $2 );
+                if ( Foswiki::Func::topicExists( $guessweb, $guesstopic ) ) {
+
                     # Found an existing topic
-                    ($web, $topic) = ($guessweb, $guesstopic);
+                    ( $web, $topic ) = ( $guessweb, $guesstopic );
                     last;
                 }
             }
@@ -234,175 +239,201 @@ sub processInbox {
 
         # If we didn't get the name of an existing topic from the
         # To: or CC:, use the Subject:
-        if( !$topic && $box->{topicPath} =~ /\bsubject\b/ &&
-              $subject =~
-                /^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$)/ ) {
-            ($web, $topic) = Foswiki::Func::normalizeWebTopicName(
-                ($1 || $box->{defaultWeb}), $2);
+        if (  !$topic
+            && $box->{topicPath} =~ /\bsubject\b/
+            && $subject =~
+/^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$)/
+          )
+        {
+            ( $web, $topic ) = Foswiki::Func::normalizeWebTopicName(
+                ( $1 || $box->{defaultWeb} ), $2 );
+
             # This time the topic doesn't have to exist
         }
 
         $web ||= $box->{defaultWeb};
 
-        print STDERR "Topic $web.",$topic||'',"\n" if $this->{debug};
+        print STDERR "Topic $web.", $topic || '', "\n" if $this->{debug};
 
-        unless( Foswiki::Func::webExists( $web )) {
+        unless ( Foswiki::Func::webExists($web) ) {
             $topic = '';
         }
 
-        if( !$topic ) {
-            if( $box->{onNoTopic} =~ /\berror\b/ ) {
+        if ( !$topic ) {
+            if ( $box->{onNoTopic} =~ /\berror\b/ ) {
                 $this->_onError(
-                    $box, $mail,
-                    'Could not add your submission; no valid web.topic found in'.
-                      "\nTo: ".$mail->header('To').
-                        "\nSubject: ".$subject,
-                    \%kill, $num );
+                    $box,
+                    $mail,
+                    'Could not add your submission; no valid web.topic found in'
+                      . "\nTo: "
+                      . $mail->header('To')
+                      . "\nSubject: "
+                      . $subject,
+                    \%kill,
+                    $num
+                );
             }
-            if( $box->{onNoTopic} =~ /\bspam\b/ ) {
-                if( $box->{spambox} && $box->{spambox} =~ /^(.*)\.(.*)$/ ) {
+            if ( $box->{onNoTopic} =~ /\bspam\b/ ) {
+                if ( $box->{spambox} && $box->{spambox} =~ /^(.*)\.(.*)$/ ) {
                     ( $web, $topic ) = ( $1, $2 );
                 }
             }
-            print STDERR "Skipping; no topic\n" if( $this->{debug} );
+            print STDERR "Skipping; no topic\n" if ( $this->{debug} );
             next unless $topic;
         }
 
-        if( $received > $this->{lastMailIn} ) {
+        if ( $received > $this->{lastMailIn} ) {
             my $err = '';
-            unless( Foswiki::Func::webExists( $web )) {
+            unless ( Foswiki::Func::webExists($web) ) {
                 $err = "Web $web does not exist";
-            } else {
-                my $sender = $mail->header( 'From' ) || 'unknown';
+            }
+            else {
+                my $sender = $mail->header('From') || 'unknown';
 
                 my @attachments = ();
-                my $body = '';
+                my $body        = '';
 
                 _extract( $mail, \$body, \@attachments );
 
                 print "Received mail from $sender for $web.$topic\n";
 
-                $err .= $this->_saveTopic( $user, $web, $topic, $body,
-                                           $subject, \@attachments );
+                $err .= $this->_saveTopic( $user, $web, $topic, $body, $subject,
+                    \@attachments );
             }
-            if( $err ) {
+            if ($err) {
                 $this->_onError(
-                    $box, $mail,
-                    "Foswiki encountered an error while adding your mail to $web.$topic: $err", \%kill, $num );
-            } else {
-                if( $box->{onSuccess} =~ /\breply\b/ ) {
-                    $this->_reply(
-                        $box, $mail,
-                        "Thank you for your successful submission to $web.$topic");
+                    $box,
+                    $mail,
+"Foswiki encountered an error while adding your mail to $web.$topic: $err",
+                    \%kill,
+                    $num
+                );
+            }
+            else {
+                if ( $box->{onSuccess} =~ /\breply\b/ ) {
+                    $this->_reply( $box, $mail,
+"Thank you for your successful submission to $web.$topic"
+                    );
                 }
-                if( $box->{onSuccess} =~ /\bdelete\b/ ) {
-                    $kill{$mail->header( 'Message-ID' )} = $num;
+                if ( $box->{onSuccess} =~ /\bdelete\b/ ) {
+                    $kill{ $mail->header('Message-ID') } = $num;
                 }
             }
-        } elsif( $this->{debug} ) {
+        }
+        elsif ( $this->{debug} ) {
             print STDERR "Skipping; late: $received <= $this->{lastMailIn}\n";
         }
     }
 
     eval 'use Email::Delete';
-    if( $@ ) {
-        Foswiki::writeWarning( "Cannot delete from inbox: $@\n" );
-    } else {
-        Email::Delete::delete_message
-            ( from => $box->{folder},
-              matching =>
-                sub {
-                    my $test = shift;
-                    if( defined $kill{$test->header('Message-ID')} ) {
-                        print STDERR "Delete ",$test->header('Message-ID'),"\n"
-                          if $this->{debug};
-                        return 1;
-                    }
-                    return 0;
-                } );
+    if ($@) {
+        Foswiki::writeWarning("Cannot delete from inbox: $@\n");
+    }
+    else {
+        Email::Delete::delete_message(
+            from     => $box->{folder},
+            matching => sub {
+                my $test = shift;
+                if ( defined $kill{ $test->header('Message-ID') } ) {
+                    print STDERR "Delete ", $test->header('Message-ID'), "\n"
+                      if $this->{debug};
+                    return 1;
+                }
+                return 0;
+            }
+        );
     }
 }
 
 sub _onError {
-    my( $this, $box, $mail, $mess, $kill, $num ) = @_;
+    my ( $this, $box, $mail, $mess, $kill, $num ) = @_;
 
-    $this->{error} = $mess; # used by the tests
+    $this->{error} = $mess;    # used by the tests
 
-    print STDERR "ERROR: $mess\n" if( $this->{debug} );
+    print STDERR "ERROR: $mess\n" if ( $this->{debug} );
 
-    if( $box->{onError} =~ /\blog\b/ ) {
-        Foswiki::Func::writeWarning( $mess );
+    if ( $box->{onError} =~ /\blog\b/ ) {
+        Foswiki::Func::writeWarning($mess);
     }
-    if( $box->{onError} =~ /\breply\b/ ) {
+    if ( $box->{onError} =~ /\breply\b/ ) {
         $this->_reply( $box, $mail,
-                       "Foswiki found an error in your e-mail submission\n\n$mess\n\n".
-                         $mail->as_string());
+            "Foswiki found an error in your e-mail submission\n\n$mess\n\n"
+              . $mail->as_string() );
     }
-    if( $box->{onError} =~ /\bdelete\b/ ) {
-        $kill->{$mail->header( 'Message-ID' )} = $num;
+    if ( $box->{onError} =~ /\bdelete\b/ ) {
+        $kill->{ $mail->header('Message-ID') } = $num;
     }
 }
 
 # Extract plain text and attachments from the MIME
 sub _extract {
-    my( $mime, $text, $attach ) = @_;
+    my ( $mime, $text, $attach ) = @_;
 
     foreach my $part ( $mime->parts() ) {
         my $ct = $part->content_type || 'text/plain';
         my $dp = $part->header('Content-Disposition') || 'inline';
-        if( $ct =~ m[text/plain] && $dp =~ /inline/ ) {
+        if ( $ct =~ m[text/plain] && $dp =~ /inline/ ) {
             $$text .= $part->body();
-        } elsif ( $part->filename()) {
-            push( @$attach,
-                  {
-                      payload => $part->body(),
-                      filename => $part->filename()
-                     } );
-        } elsif( $part != $mime ) {
+        }
+        elsif ( $part->filename() ) {
+            push(
+                @$attach,
+                {
+                    payload  => $part->body(),
+                    filename => $part->filename()
+                }
+            );
+        }
+        elsif ( $part != $mime ) {
             _extract( $part, $text, $attach );
         }
     }
 }
 
 sub _saveTopic {
-    my( $this, $user, $web, $topic, $body, $subject, $attachments ) = @_;
+    my ( $this, $user, $web, $topic, $body, $subject, $attachments ) = @_;
     my $err = '';
 
     my $curUser = $Foswiki::Plugins::SESSION->{user};
     $Foswiki::Plugins::SESSION->{user} = $user;
 
     try {
-        my( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
+        my ( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
 
         my $opts;
-        if( $text =~ /<!--MAIL(?:{(.*?)})?-->/ ) {
-            $opts = new Foswiki::Attrs( $1 );
-        } else {
-            $opts = new Foswiki::Attrs( '' );
+        if ( $text =~ /<!--MAIL(?:{(.*?)})?-->/ ) {
+            $opts = new Foswiki::Attrs($1);
+        }
+        else {
+            $opts = new Foswiki::Attrs('');
         }
         $opts->{template} ||= 'normal';
-        $opts->{where} ||= 'bottom';
+        $opts->{where}    ||= 'bottom';
+
         # the $insert variable is initialized from
         # %SYSTEMWEB%/MailInContribTemplate and the recommended way to change
         # the look and feel of the output pages is to copy
         # MailInContribTemplate as MailInContribUserTemplate and edit to
         # taste. - VickiBrown - 07 Sep 2007
-        my $insert = Foswiki::Func::expandTemplate( 'MAILIN:'.$opts->{template} );
-        $insert ||= "   * *%SUBJECT%*: %TEXT% _%WIKIUSERNAME% @ %SERVERTIME%_\n";
+        my $insert =
+          Foswiki::Func::expandTemplate( 'MAILIN:' . $opts->{template} );
+        $insert ||=
+          "   * *%SUBJECT%*: %TEXT% _%WIKIUSERNAME% @ %SERVERTIME%_\n";
         $insert =~ s/%SUBJECT%/$subject/g;
-        $body =~ s/\r//g;
+        $body   =~ s/\r//g;
 
         my $attached = 0;
-        my $atts = '';
-        foreach my $att ( @$attachments ) {
+        my $atts     = '';
+        foreach my $att (@$attachments) {
             $attached = 1;
             $err .= $this->_saveAttachment( $web, $topic, $att );
             my $tmpl = Foswiki::Func::expandTemplate(
-                'MAILIN:'.$opts->{template}.':ATTACHMENT' );
-            if( $tmpl ) {
+                'MAILIN:' . $opts->{template} . ':ATTACHMENT' );
+            if ($tmpl) {
                 $tmpl =~ s/%A_FILE%/$att->{filename}/g;
                 $atts .= $tmpl;
-            } else {
+            }
+            else {
                 print 'No template for attachments' if $this->{debug};
             }
         }
@@ -412,80 +443,92 @@ sub _saveTopic {
         $insert = Foswiki::Func::expandVariablesOnTopicCreation($insert);
 
         # Reload the topic if we added attachments.
-        if( $attached ) {
+        if ($attached) {
             ( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
         }
 
-        if( $opts->{where} eq 'top' ) {
-            $text = $insert.$text;
-        } elsif( $opts->{where} eq 'bottom' ) {
+        if ( $opts->{where} eq 'top' ) {
+            $text = $insert . $text;
+        }
+        elsif ( $opts->{where} eq 'bottom' ) {
             $text .= $insert;
-        } elsif( $opts->{where} eq 'above' ) {
+        }
+        elsif ( $opts->{where} eq 'above' ) {
             $text =~ s/(<!--MAIL(?:{.*?})?-->)/$insert$1/;
-        } elsif( $opts->{where} eq 'below' ) {
+        }
+        elsif ( $opts->{where} eq 'below' ) {
             $text =~ s/(<!--MAIL(?:{.*?})?-->)/$1$insert/;
         }
 
-        print STDERR "Save topic $web.$topic:\n$text\n" if( $this->{debug} );
+        print STDERR "Save topic $web.$topic:\n$text\n" if ( $this->{debug} );
 
-        ASSERT(!$meta || $meta->isa('Foswiki::Meta')) if DEBUG;
+        ASSERT( !$meta || $meta->isa('Foswiki::Meta') ) if DEBUG;
         Foswiki::Func::saveTopic(
             $web, $topic, $meta, $text,
-            { comment => "Submitted by e-mail",
-              forcenewrevision => 1} );
+            {
+                comment          => "Submitted by e-mail",
+                forcenewrevision => 1
+            }
+        );
 
-    } catch Foswiki::AccessControlException with {
+    }
+    catch Foswiki::AccessControlException with {
         my $e = shift;
         $err .= $e->stringify();
-    } catch Error::Simple with {
+    }
+    catch Error::Simple with {
         my $e = shift;
         $err .= $e->stringify();
-    } finally {
+    }
+    finally {
         $Foswiki::Plugins::SESSION->{user} = $curUser;
     };
     return $err;
 }
 
 sub _saveAttachment {
-    my( $this, $web, $topic, $attachment ) = @_;
+    my ( $this, $web, $topic, $attachment ) = @_;
     my $filename = $attachment->{filename};
-    my $payload = $attachment->{payload};
+    my $payload  = $attachment->{payload};
 
-    print STDERR "Save attachment $filename\n" if( $this->{debug} );
+    print STDERR "Save attachment $filename\n" if ( $this->{debug} );
 
-    my $tmpfile = $web.'_'.$topic.'_'.$filename;
-    $tmpfile = $Foswiki::cfg{PubDir}.'/'.$tmpfile;
+    my $tmpfile = $web . '_' . $topic . '_' . $filename;
+    $tmpfile = $Foswiki::cfg{PubDir} . '/' . $tmpfile;
 
     $tmpfile .= 'X' while -e $tmpfile;
-    open( TF, ">$tmpfile" ) || return 'Could not write '.$tmpfile;
+    open( TF, ">$tmpfile" ) || return 'Could not write ' . $tmpfile;
     print TF $attachment->{payload};
-    close( TF );
+    close(TF);
 
     my $err = '';
+
     # SMELL: no central way to process attachment filenames, so we
     # have to copy-paste the Foswiki core code.
     $filename =~ s/ /_/go;
     $filename =~ s/$Foswiki::cfg{NameFilter}//goi;
     $filename =~ s/$Foswiki::cfg{UploadFilter}/$1\.txt/goi;
-    Foswiki::Func::saveAttachment(
-        $web, $topic, $filename,
-        { comment => "Submitted by e-mail", file => $tmpfile });
-    unlink( $tmpfile );
+    Foswiki::Func::saveAttachment( $web, $topic, $filename,
+        { comment => "Submitted by e-mail", file => $tmpfile } );
+    unlink($tmpfile);
     return $err;
 }
 
 # Reply to a mail
 sub _reply {
-    my( $this, $box, $mail, $body ) = @_;
-    my $addressee = $mail->header('Reply-To') ||
-      $mail->header('From') ||
-        $mail->header('Return-Path');
+    my ( $this, $box, $mail, $body ) = @_;
+    my $addressee =
+         $mail->header('Reply-To')
+      || $mail->header('From')
+      || $mail->header('Return-Path');
     die "No addressee" unless $addressee;
     my $message =
-      "To: $addressee" .
-        "\nFrom: ".$mail->header('To').
-          "\nSubject: RE: your Foswiki submission to ".$mail->header('Subject').
-            "\n\n$body\n";
+        "To: $addressee"
+      . "\nFrom: "
+      . $mail->header('To')
+      . "\nSubject: RE: your Foswiki submission to "
+      . $mail->header('Subject')
+      . "\n\n$body\n";
     my $errors = Foswiki::Func::sendEmail( $message, 5 );
     if ($errors) {
         print "Failed trying to send mail: $errors\n";

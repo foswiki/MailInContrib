@@ -33,7 +33,7 @@
 #      <code>pop://me:123@mail.isp.com:110/</code></li>
 #  <li> user - name of the default user.<br />
 #      The From: in the mail is parsed to extract the senders email
-#      address. This is then be looked up in the TWiki users database
+#      address. This is then be looked up in the users database
 #      to find the wikiname. If the user is not found, then this default
 #      user will be used. If the default user is left blank, then the
 #      user *must* be found from the mail.

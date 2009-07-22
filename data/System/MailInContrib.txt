@@ -3,16 +3,6 @@
 <a href="http://wikiring.com"><img src="%ATTACHURL%/logo.gif" style="float:right" /></a>
 This Contrib supports the submission of content to Foswiki topics via e-mail.
 
-<!--
-
-   PLEASE DO NOT EDIT THIS TOPIC
-
-   It is automatically generated from the subversion repository, and any changes
-   you make will simply be overwritten the next time a release is generated.
-
-   Instead, you could check your fix in, raise a bug in the Tasks web, or mail the author.
--->
-
 Mails can be pulled out of mail folders using [[CPAN:Email::Folder::POP3][POP3]], [[CPAN:Email::Folder::IMAP][IMAP]], or anything else supported by CPAN:Email::Folder.
 
 The implementation is very simple; a script called =mailincron= is run every so often (usually by =cron= or an equivalent offline job scheduler). The script trawls the mail folders you specify and grabs messages that it recognises as being for the wiki.
@@ -75,7 +65,7 @@ You can configure the module to look at the =From:= entry in the email, and if a
 You can also optionally set a default user for an inbox, so if the user can't be identified from the mail, it will fall back to the default.
 
 <!--
-      * Set SHORTDESCRIPTION = Supports submissions to Foswiki via e-mail
+      * Set SHORTDESCRIPTION = %$SHORTDESCRIPTION%
 -->
 
 ---++ Installation
@@ -107,6 +97,7 @@ Many thanks to the following sponsors for supporting this work:
 |  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Dependencies: | %$DEPENDENCIES% |
 |  Version: | %$VERSION% |
+|  Release: | %$RELEASE% |
 | Change History: | |
 |  3 Feb 2009 | Foswikitask:Item456: ported to Foswiki Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
 |  1 Aug 2008 | TWikibug:Item5450: minor doc fix |

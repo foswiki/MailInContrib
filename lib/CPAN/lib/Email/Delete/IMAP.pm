@@ -15,8 +15,8 @@ sub delete_message {
     my @trash;
 
     my $num = 1;
-    while( my $mail = $folder->next_message() ) {
-        if( $args{matching}->($mail) ) {
+    while ( my $mail = $folder->next_message() ) {
+        if ( $args{matching}->($mail) ) {
             push( @trash, $num );
         }
         $num++;
@@ -25,8 +25,9 @@ sub delete_message {
     # SMELL: assumes internals of Email::Folder
     my $server = $folder->{_folder}->{_server};
     foreach my $id ( reverse @trash ) {
-        $server->delete( $id );
+        $server->delete($id);
     }
+
     # must quit, otherwise the object will go out of scope and the
     # folder will be reset before the connection is closed.
     $server->quit();
