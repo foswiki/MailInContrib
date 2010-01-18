@@ -51,11 +51,15 @@ The module can use special HTML comments in the topic to decide where to insert 
 
 If it sees the comment =&lt;!--MAIL--&gt;= it will insert the incoming mail immediately *below* the comment. =MAIL= is rather ike a [[%SYSTEMWEB%.Macro][Foswiki macro]]; you can give it parameters. For example, =&lt;!--MAIL{where="below"}--&gt;=. The following options are available:
    * =where= - can be =above=, =below= (relative to the comment) =top=, =bottom= (of the topic)
-   * =template= set to the name of one of the templates in %SYSTEMWEB%.MailInContribTemplate to change the formatting of comments. The default format is "below" format.
+   * =template= set to the name of one of the templates (see below) to change the formatting of comments. The default format is "below" format.
 
 If there is no such comment in the topic, then it just appends it to the end. If there is more than one, only the first is recognised.
 
 Any attachments in the mail get added to the target topic as attachments. Attachments are also listed immediately below the mail body in the topic.
+
+The templates are loaded from %SYSTEMWEB%/MailInContribTemplate, and the recommended way
+to change the look and feel of the output pages is to copy !MailInContribTemplate as
+!MailInContribUserTemplate and edit to taste.
 
 ---+ How the contributor is identified
 The user identity is used for access control checks on the target topic, so you can use Foswiki access controls to protect target topics.
@@ -93,30 +97,16 @@ Many thanks to the following sponsors for supporting this work:
    * [[http://www.evolvedmedianetwork.com][Evolved Media Network]]
 
 |  Author: | Foswiki:Main.CrawfordCurrie (http://c-dot.co.uk) |
-|  Copyright &copy;: | 2005, TWiki Contributors<br />2008-2009 Foswiki Contributors |
-|  License: | GPL ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
+|  Copyright &copy;: | 2005, TWiki Contributors<br />2008-2010 Foswiki Contributors |
+|  License: | GPL v2 ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Dependencies: | %$DEPENDENCIES% |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 | Change History: | |
-|  3 Feb 2009 | Foswikitask:Item456: ported to Foswiki Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
-|  1 Aug 2008 | TWikibug:Item5450: minor doc fix |
-|  8 Sep 2007 | TWikibug:Item4575 various ideas from Dev topic, tested against 4.2.0 |
-|  12412 | Fixed TWikibug:Item3334 by removing dependency on !FuncUsersContrib |
-|  10239 | Added support for listing attachments in-line with the mail |
-|  10182 | Fixed parser failures on multipart MIME messages |
-|  10111 | Fixed problem with spaces in attachment names |
-|  9427 | Added Email::Delete::POP3 and Email::Delete::IMAP implementations, and solved a curious problem with IMAP folders, where the MIME parser couldn't parse messages coming from them. |
-|  8969 | TWikibug:Item1665 - TWikibug:Item1666: Now configurable to accept mail only from registered users. Automatically maps the user and signs the contribution. Also configurable to parse the topic from the To: line. Also improved error reporting and recovery. |
-|  7205 | TWikibug:Item788 - updated CPAN dependencies for MailInContrib |
-|  7196 | TWikibug:Item784 - Added POP3 support for delete. Don't understand why it was working before; though I suspect it must have been using MailDir |
-|  6993 | TWikibug:Item143 - Cairo compatibility in MailInContrib |
-|  5980 | TWikibug:Item181 - added dependendcy on Error for Cairo installs; split contributions using a blank line to stop them crushing together |
-|  5961 | TWikibug:Item181 - minor formatting issue fixed |
-|  5960 | TWikibug:Item181 - new version, supports DEVELOP and Cairo, and adds support for attachments (you can now mail attachments to topics) |
-|  31 July 2005 | 1.001 Back-ported to Cairo, added spambox (work generously supported by the [[http://www.evolvedmedianetwork.com/][Evolved Media Network]]) |
+|  3 Feb 2009 | Foswikitask:Item456: ported Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
 |  10 Mar 2005 | 1.000 Initial version |
 |  Home: | Foswiki:Extensions/%TOPIC% |
+|  Support: | Foswiki:Support/%TOPIC% |
 
 __Related Topics:__ %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
 

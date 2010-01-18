@@ -35,7 +35,7 @@ use Error qw( :try );
 use Carp;
 
 our $VERSION = '$Rev: 10183$';
-our $RELEASE = '22 Jul 2009';
+our $RELEASE = '18 Jan 2010';
 our $SHORTDESCRIPTION = 'Supports submissions to Foswiki via e-mail';
 
 BEGIN {
@@ -146,8 +146,10 @@ sub processInbox {
     $box->{onError}    ||= 'log';
     $box->{onSuccess}  ||= 'log';
 
-    # Load the file of mail templates
-    my $templates = Foswiki::Func::loadTemplate('MailInContrib');
+    # Load the mail templates
+    Foswiki::Func::loadTemplate('MailInContrib');
+    # Load second so that user templates override
+    Foswiki::Func::loadTemplate('MailInContribUser');
 
     print STDERR "Scanning $box->{folder}\n" if $this->{debug};
     my $mail;    # an Email::Simple object

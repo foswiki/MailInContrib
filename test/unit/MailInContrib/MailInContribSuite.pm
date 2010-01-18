@@ -19,18 +19,19 @@ sub set_up {
     $this->SUPER::set_up();
 
     $this->{system_web} = 'TemporaryMailInContribSuiteSystemWeb';
-    $this->{twiki}->{store}->createWeb( $this->{twiki}->{user},
-        $this->{system_web}, $Foswiki::cfg{SystemWebName} );
+    Foswiki::Func::createWeb( $this->{system_web}, $Foswiki::cfg{SystemWebName} );
     my $adm =
       Foswiki::Func::getCanonicalUserID( $Foswiki::cfg{AdminUserWikiName} );
     $Foswiki::Plugins::SESSION->{user} = $adm;
     Foswiki::Func::saveTopic( $this->{system_web}, 'WebPreferences', undef,
         "" );
 
+    # Patch the template path so we find our templates
+    $Foswiki::cfg{TemplatePath} =~ s/$Foswiki::cfg{SystemWebName}/$this->{system_web}/g;
     $Foswiki::cfg{SystemWebName} = $this->{system_web};
 
-    $this->{twiki}->finish();
-    $this->{twiki} = new Foswiki();
+    $this->{session}->finish();
+    $this->{session} = new Foswiki();
 
     my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
     open( F, ">$workdir/timestamp" ) || die $!;
@@ -41,9 +42,9 @@ sub set_up {
     Foswiki::Func::saveTopic( $this->{test_web}, $this->{test_topic}, undef,
         "" );
 
-    $this->{twiki}->finish();
-    $this->{twiki} = new Foswiki();
-    $this->{twiki}->net->setMailHandler( \&sentMail );
+    $this->{session}->finish();
+    $this->{session} = new Foswiki();
+    $this->{session}->net->setMailHandler( \&sentMail );
 
     $box = {};
 
@@ -61,7 +62,7 @@ sub set_up {
 sub tear_down {
     my $this = shift;
 
-    $this->removeWebFixture( $this->{twiki}, $this->{system_web} );
+    $this->removeWebFixture( $this->{session}, $this->{system_web} );
     File::Path::rmtree( $box->{folder} );
     $this->SUPER::tear_down();
 }
@@ -86,7 +87,7 @@ sub sentMail {
 
 sub cron {
     my $this = shift;
-    my $min = new Foswiki::Contrib::MailInContrib( $this->{twiki}, 0 );
+    my $min = new Foswiki::Contrib::MailInContrib( $this->{session}, 0 );
     $min->processInbox($box);
     $min->wrapUp();
     return $min;
@@ -246,9 +247,11 @@ HERE
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, 'DangleBerries' );
 
-    $t =~
-s/\* \*no valid topic\*: Message 1 text here\s*-- $this->{users_web}.AllyGator -\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+//s;
-    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert(
+        $t =~ s/^\s*\* \*no valid topic\*: Message 1 text here$//m, $t);
+    $this->assert(
+        $t =~ s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m, $t);
+    $this->assert_matches( qr/^\s*$/s, $t );
     $this->assert_equals( 0, scalar(@mails) );
 }
 
@@ -425,13 +428,14 @@ Subject: %SUBJECT%
 Body: %TEXT%
 %TMPL:END%
 HERE
-
     Foswiki::Func::saveTopic( $this->{test_web}, 'TargetTopic', undef,
         <<'HERE');
+
 BEGIN
 <!--MAIL{template="wierd" where="above"}-->
 END
 HERE
+
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
     $this->assert_equals( 1, scalar(@mails) );
