@@ -70,12 +70,53 @@ sub tear_down {
 sub sendTestMail {
     my ( $this, $mail ) = @_;
     my $nbr = 1;
-    while ( -f "$box->{folder}new/mail$nbr" ) {
+
+    # Generates unique filenames for the mail files in the maildir 
+    # "new mail" directory.
+    #
+    # On an ext3 filesystem (and possibly others, too) Perl's readdir 
+    # returns files in hash order. The hash is created from the filename 
+    # and a "secret" that is different for each individual filesystem.
+    # So the hash order for a fixed set of filenames varies from
+    # computer to computer, but is consistent on each computer.
+    # Putting the process ID in the filename should make the hash order
+    # vary from run to run on an ext3 filesystem, thus eliminating 
+    # accidental dependence on properties that vary between computers.
+    while ( -f "$box->{folder}new/mail".$$.$nbr ) {
         $nbr++;
     }
-    open( F, ">$box->{folder}new/mail$nbr" );
+    open( F, ">$box->{folder}new/mail".$$.$nbr );
     print F $mail;
     close(F);
+}
+
+sub expectedMailOrder
+{
+    my $this = shift;
+    # This function reads the list of files in the maildir directory using readdir
+    # to determine the order in which Email::Folder will return the mail messages
+    #
+    # ASSUMPTION : Email::Folder::Maildir uses readdir to get a list of files 
+    # in the maildir directory.
+    #
+    # This is true for the version packaged with Email::Folder 0.855
+    #
+    # ASSUMPTION : For a given set of filenames in a given directory, 
+    # on a given filesystem, readdir ALWAYS returns the files in the same order.
+    # It is assumed that this holds for ALL TYPES OF FILESYSTEM.
+    #
+    # The order MAY differ between different types of filesystem and between
+    # different filesystems of the same type (and therefore also between computers).
+    local *DIR;
+    my @order;
+    opendir(DIR,"$box->{folder}new") or $this->assert(0, "Could not open '$box->{folder}new': $!");
+    foreach my $file (readdir DIR) {
+        next if $file =~ /^\./; # as suggested by DJB
+        $file =~ s/^mail$$(\d+)$//
+            or $this->assert(0, "Mail file '$file' in $box->{folder}new has the wrong format");
+        push @order, $1;
+    }
+    return @order;
 }
 
 # callback used by Net.pm
@@ -122,7 +163,104 @@ and there is no valid default username', $c->{error}
 }
 
 # topicPath to and subject
-sub testTopicPathTo {
+sub testSimpleTopicPathTo {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message1
+Reply-To: sender1\@example.com
+To: $this->{test_web}.$this->{test_topic}\@example.com
+Subject: $this->{test_web}.NotHere
+From: mole\@hill
+
+Message 1 text here
+HERE
+    $this->sendTestMail($mail);
+    $box->{topicPath} = 'to';
+    my $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~ s/^Message 1 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
+
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testSimpleTopicPathToCC {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message1
+Reply-To: sender1\@example.com
+To: $this->{test_web}.NotHere\@example.com
+CC: $this->{test_web}.$this->{test_topic}\@example.com
+Subject: $this->{test_web}.NotHere
+From: mole\@hill
+
+Message 1 text here
+HERE
+    $this->sendTestMail($mail);
+    $box->{topicPath} = 'to';
+    my $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~ s/^Message 1 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
+
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testQuotedNameTopicPathTo {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message2
+Reply-To: sender2\@example.com
+To: "$this->{test_topic} $this->{test_web}" <$this->{test_web}.$this->{test_topic}\@example.com>
+Subject: $this->{test_web}.IgnoreThis
+From: ally\@masai.mara
+
+Message 2 text here
+HERE
+    $this->sendTestMail($mail);
+    $box->{topicPath} = 'to';
+    my $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: //s;
+    $this->assert( 0, $t )
+      unless $t =~ s/^Message 2 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testDoubleTopicPathTo {
     my $this = shift;
 
     my $mail = <<HERE;
@@ -145,6 +283,7 @@ From: ally\@masai.mara
 Message 2 text here
 HERE
     $this->sendTestMail($mail);
+    my @messageOrder = $this->expectedMailOrder();
     $box->{topicPath} = 'to';
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
@@ -152,26 +291,36 @@ HERE
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
-    $this->assert( 0, $t )
-      unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
-    $this->assert( 0, $t )
-      unless $t =~ s/^Message 1 text here\s*//s;
-    $this->assert( 0, $t )
-      unless $t =~
+    for my $messageNumber (@messageOrder)
+    {
+        if ($messageNumber == 1) {
+            $this->assert( 0, $t )
+              unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
+            $this->assert( 0, $t )
+              unless $t =~ s/^Message 1 text here\s*//s;
+            $this->assert( 0, $t )
+              unless $t =~
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
-    $this->assert( 0, $t )
-      unless $t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: //s;
-    $this->assert( 0, $t )
-      unless $t =~ s/^Message 2 text here\s*//s;
-    $this->assert( 0, $t )
-      unless $t =~
+        }
+        elsif ($messageNumber == 2) {
+            $this->assert( 0, $t )
+              unless $t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: //s;
+            $this->assert( 0, $t )
+              unless $t =~ s/^Message 2 text here\s*//s;
+            $this->assert( 0, $t )
+              unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+        }
+        else {
+            $this->assert(0, "Unexpected message number $messageNumber");
+        }
+    }
 
     $this->assert_matches( qr/^\s*$/, $t );
     $this->assert_equals( 0, scalar(@mails) );
 }
 
-sub testTopicPathSubject {
+sub testTopicPathOnlyWebTopicInSubject {
     my $this = shift;
 
     my $mail = <<HERE;
@@ -184,7 +333,30 @@ From: mole\@hill
 Message 1 text here
 HERE
     $this->sendTestMail($mail);
-    $mail = <<HERE;
+    $box->{topicPath} = 'subject';
+    my $c = $this->cron();
+    if ( $c->{error} ) {
+        print STDERR $c->{error}, "\n";
+        $this->assert_null( $c->{error} );
+    }
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~
+s/^\s*\* \*$this->{test_web}.$this->{test_topic}\*: Message 1 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testTopicPathExtraTextInSubject {
+    my $this = shift;
+
+    my $mail = <<HERE;
 Message-ID: message2
 Reply-To: sender2\@example.com
 To: "$this->{test_topic} IgnoreThis" <$this->{test_web}.IgnoreThis\@example.com>
@@ -206,13 +378,74 @@ HERE
 
     $this->assert( 0, $t )
       unless $t =~
-s/^\s*\* \*$this->{test_web}.$this->{test_topic}\*: Message 1 text here\s*//s;
-    $this->assert( 0, $t )
-      unless $t =~
-s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
-    $this->assert( 0, $t )
-      unless $t =~
 s/^\s*\*\s*\*$this->{test_web}.$this->{test_topic}: SPAM\*: Message 2 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testTopicPathExtraTextNoWebInSubject {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message3
+Reply-To: sender3\@example.com
+To: "$this->{test_topic} IgnoreThis" <NoSuch$this->{test_web}.IgnoreThis\@example.com>
+Subject: $this->{test_topic}: SPAM
+From: ally\@masai.mara
+
+Message 3 text here
+HERE
+    $this->sendTestMail($mail);
+    $box->{topicPath} = 'subject';
+    $box->{defaultWeb} = $this->{test_web};
+    my $c = $this->cron();
+    if ( $c->{error} ) {
+        print STDERR $c->{error}, "\n";
+        $this->assert_null( $c->{error} );
+    }
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~
+s/^\s*\*\s*\*$this->{test_topic}: SPAM\*: Message 3 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@mails) );
+}
+
+sub testTopicPathSubjectToFallthru {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message3
+Reply-To: sender3\@example.com
+To: "$this->{test_web}.IgnoreThis$this->{test_topic} IgnoreThis" <NoSuch$this->{test_web}.IgnoreThis$this->{test_topic}\@example.com>
+Subject: $this->{test_web}.$this->{test_topic}: SPAM
+From: ally\@masai.mara
+
+Message 4 text here
+HERE
+    $this->sendTestMail($mail);
+    $box->{topicPath} = 'to subject';
+    my $c = $this->cron();
+    if ( $c->{error} ) {
+        print STDERR $c->{error}, "\n";
+        $this->assert_null( $c->{error} );
+    }
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~
+s/^\s*\*\s*\*$this->{test_web}.$this->{test_topic}: SPAM\*: Message 4 text here\s*//s;
     $this->assert( 0, $t )
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
@@ -240,7 +473,7 @@ HERE
     $box->{topicPath}  = 'subject';
     $box->{onNoTopic}  = 'spam';
     $box->{spambox}    = $this->{test_web} . '.DangleBerries';
-    $box->{defaultWeb} = $this->{test_web};
+    $box->{defaultWeb} = "NotThe$this->{test_web}";
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
 
