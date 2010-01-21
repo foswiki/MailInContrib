@@ -4,22 +4,22 @@
 # The configuration is in the form of an (perl) array of mailbox
 # specifications. Each specification defines a number of fields:
 # <ul>
-#  <li> onError - what you want TWiki to do if an error occurs while processing
+#  <li> onError - what you want Foswiki to do if an error occurs while processing
 #   a mail (comma-separated list of options). Available options:
 #   <ul>
 #    <li> reply - reply to the sender</li>
 #    <li> delete - delete the mail from the inbox</li>
-#    <li> log - log the error to the TWiki warning log</li>
+#    <li> log - log the error to the Foswiki warning log</li>
 #   </ul>
-#   Note: if you don't specify delete, TWiki will continue to try to process the
+#   Note: if you don't specify delete, Foswiki will continue to try to process the
 #   mail each time the cron job runs.
 #  </li>
-#  <li> topicPath - where you want TWiki to look for the name of the target
+#  <li> topicPath - where you want Foswiki to look for the name of the target
 #   topic (comma-separated list of options). Available options:
 #   <ul>
 #    <li> to - look in the To: e.g. <code>Web.TopicName@example.com</code> or
 #     <code>"Web TopicName" &lt;web.topicname@example.com&gt;</code> </li>
-#    <li> subject - look in the Subject: e.g "Web.TopicName: mail for TWiki"
+#    <li> subject - look in the Subject: e.g "Web.TopicName: mail for Foswiki"
 #     If "to" and "subject" are both enabled, but a valid topic name is not
 #     found in the To:, the Subject: will still be parsed to try and get the
 #     topic.</li>
@@ -40,7 +40,7 @@
 #      The identity of the sending user is important for access controls.
 #      This must be a user *login* name.e.g. 'guest'
 #  </li>
-#  <li> onSuccess - what  you want TWiki to do with messages that have been successfully added to a TWiki topic
+#  <li> onSuccess - what  you want Foswiki to do with messages that have been successfully added to a Foswiki topic
 #     (comma-separated list of options)
 #     Available options:
 #   <ul>
@@ -50,12 +50,12 @@
 #  <li> defaultWeb - name of the web to save mails in if the web name isn't
 #   specified in the mail. If this is undefined or left blank, then mails must
 #   contain a full web.topicname or the mail will be rejected.</li>
-#  <li> onNoTopic - what do you want TWiki to do if it can't find a valid
+#  <li> onNoTopic - what do you want Foswiki to do if it can't find a valid
 #   topic name in the mail (one option). Available options:
 #   <ul>
 #    <li> error - treat this as an error (overrides all other options)</li>
 #    <li> spam - save the mail in the spambox topic.
-#    Note: if you clear this, then TWiki will simply ignore the mail..</li>
+#    Note: if you clear this, then Foswiki will simply ignore the mail..</li>
 #   </ul>
 #  </li>
 #  <li> spambox - optional required of onNoTopic = spam. Name of the topic
