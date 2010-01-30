@@ -7,6 +7,6 @@ our @ISA = 'Unit::TestSuite';
 
 sub name { 'MailInContribSuite' }
 
-sub include_tests { qw(MailInContribTests) }
+sub include_tests { qw(MailInContribTests MailInContribMimeTests) }
 
 1;

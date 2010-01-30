@@ -55,12 +55,27 @@
 #   <ul>
 #    <li> error - treat this as an error (overrides all other options)</li>
 #    <li> spam - save the mail in the spambox topic.
-#    Note: if you clear this, then Foswiki will simply ignore the mail..</li>
+#    Note: if you clear this, then Foswiki will simply ignore the mail.</li>
 #   </ul>
 #  </li>
-#  <li> spambox - optional required of onNoTopic = spam. Name of the topic
+#  <li> spambox - optional, required if onNoTopic = spam. Name of the topic
 #   where you want to save mails that don't have a valid web.topic. You must
 #   specify a full web.topicname
+#  </li>
+#  <li> content - optional, defaults to "extract plain text". 
+#   Specifies what part of the mail to extract and how to process it.
+#   It takes a number of fields:
+#   <ul>
+#    <li> type - specifies type of content to extract. 
+#       Available options:
+#     <ul>
+#      <li> text - extract the plain-text portion </li>
+#      <li> html - extract the HTML portion, by preference 
+#        - reverts to the plain-text if the mail does not contain HTML 
+#      </li>
+#     </ul>
+#    </li>
+#   </ul>
 #  </li>
 # </ul>
 $Foswiki::cfg{MailInContrib} = [

@@ -61,6 +61,14 @@ The templates are loaded from %SYSTEMWEB%/MailInContribTemplate, and the recomme
 to change the look and feel of the output pages is to copy !MailInContribTemplate as
 !MailInContribUserTemplate and edit to taste.
 
+---+ Which part of the mail is added
+
+The module defaults to extracts the plain-text portion of the mail; the HTML portion (if present) is discarded. 
+When the module extracts the plain-text portion, it also discards inline images associated with the HTML (because, whilst they are part of the mail, they are not _attachments_).
+
+%X% *Experimental:*
+You can configure the module to extract the HTML portion instead, in which case the plain-text portion is discarded. The module then also extracts and attaches inline images.
+
 ---+ How the contributor is identified
 The user identity is used for access control checks on the target topic, so you can use Foswiki access controls to protect target topics.
 
@@ -103,6 +111,7 @@ Many thanks to the following sponsors for supporting this work:
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 | Change History: | |
+| _not yet released_ | Foswikitask:Item8384: Support HTML email |
 |  3 Feb 2009 | Foswikitask:Item456: ported Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
 |  10 Mar 2005 | 1.000 Initial version |
 |  Home: | Foswiki:Extensions/%TOPIC% |
