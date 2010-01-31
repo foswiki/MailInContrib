@@ -73,8 +73,13 @@
 #      <li> html - extract the HTML portion, by preference 
 #        - reverts to the plain-text if the mail does not contain HTML 
 #      </li>
+#      <li> debug - extract the whole MIME message, verbatim </li>
 #     </ul>
 #    </li>
+#    <li> processors - specifies a list of processors, to be applied in the order listed.
+#       Each processor is described by a perl Hash. The <em>pkg</em> key identifies the
+#       Perl package that provides the processor. Any other keys are passed as options
+#       to the processor. </li>
 #   </ul>
 #  </li>
 # </ul>

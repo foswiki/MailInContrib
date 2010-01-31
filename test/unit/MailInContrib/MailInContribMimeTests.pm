@@ -9,6 +9,44 @@ use File::Path;
 use Error qw( :try );
 use Foswiki::Contrib::MailInContrib;
 
+my $plainTextMessageNoMimeHeaders = <<'HERE';
+From magic@thudisk.org Thu Jan 28 20:51:23 2010
+Return-path: <magic@thudisk.org>
+Envelope-to: www-data@tou810.localdomain
+Delivery-date: Thu, 28 Jan 2010 20:51:23 +0200
+Received: from [172.16.225.1] (helo=michaeltempest)
+	by tou810.localdomain with esmtp (Exim 4.69)
+	(envelope-from <magic@thudisk.org>)
+	id 1NaZSd-00068L-5w
+	for www-data@tou810.localdomain; Thu, 28 Jan 2010 20:51:23 +0200
+Subject: $this->{test_web}.AnotherTopic: Plain Text
+From: "Ally Gator" <ally@masai.mara>
+To: "The Wiki" <wiki@some.company>
+Date: Thu, 28 Jan 2010 20:51:15 +0200
+User-Agent: Opera Mail/10.10 (Win32)
+
+Dear Bill
+
+Please come to my party on Friday morning. Be sure to bring a friend. I  
+just found lovely dot-matrix printer and I would love to show it off, so  
+please bring a good program to print out. I know you have such beautiful  
+code!
+
+#include <stdlib.h>
+#define PROBABILITY_OF_SUCCESS 0.5
+int
+main (void)
+{
+  if (rand() > PROBABILITY_OF_SUCCESS) 
+    return 1; // failure
+  return 0; // success
+}
+
+hugs and kisses
+Judy
+#include <stddisclaimer.h>
+HERE
+
 my $plainTextMessage = <<'HERE';
 From magic@thudisk.org Thu Jan 28 20:51:23 2010
 Return-path: <magic@thudisk.org>
@@ -198,7 +236,9 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	id 1NaaBy-0006VE-3e
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:38:14 +0200
 Content-Type: multipart/alternative; boundary=----------9CL0w9YQnQWV1xj9ZEirtx
-Subject: $this->{test_web}.AnotherTopic: HTML
+Subject:
+ $this->{test_web}.AnotherTopic:
+ HTML
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:38:09 +0200
@@ -492,6 +532,80 @@ Content-Transfer-Encoding: 7bit
 
 HERE
 
+my $htmlNoTextMessage = <<'HERE';
+From magic@thudisk.org Thu Jan 28 21:38:14 2010
+Return-path: <magic@thudisk.org>
+Envelope-to: www-data@tou810.localdomain
+Delivery-date: Thu, 28 Jan 2010 21:38:14 +0200
+Received: from [172.16.225.1] (helo=michaeltempest)
+	by tou810.localdomain with esmtp (Exim 4.69)
+	(envelope-from <magic@thudisk.org>)
+	id 1NaaBy-0006VE-3e
+	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:38:14 +0200
+Content-Type: text/html; charset=iso-8859-15
+Subject: $this->{test_web}.AnotherTopic: HTML
+From: "Ally Gator" <ally@masai.mara>
+To: "The Wiki" <wiki@some.company>
+Date: Thu, 28 Jan 2010 21:38:09 +0200
+MIME-Version: 1.0
+Message-ID: <op.u69ctvmdmjv6gc@michaeltempest>
+User-Agent: Opera Mail/10.10 (Win32)
+Content-Transfer-Encoding: Quoted-Printable
+Content-ID: <op.1264707489187.5f8f6d546d5d5d13@172.16.19.1>
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML>
+<HEAD><STYLE type="text/css">BODY { color:#3050a0; }</STYLE></HEAD>
+<BODY style=3D"font-weight:bold"><DIV><FONT face=3D"G=
+eorgia">Mar<em>mel</em>ade</FONT></DIV></BODY></HTML>
+HERE
+
+my $htmlWithScript = <<'HERE';
+From magic@thudisk.org Thu Jan 28 21:38:14 2010
+Return-path: <magic@thudisk.org>
+Envelope-to: www-data@tou810.localdomain
+Delivery-date: Thu, 28 Jan 2010 21:38:14 +0200
+Received: from [172.16.225.1] (helo=michaeltempest)
+	by tou810.localdomain with esmtp (Exim 4.69)
+	(envelope-from <magic@thudisk.org>)
+	id 1NaaBy-0006VE-3e
+	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:38:14 +0200
+Content-Type: multipart/alternative; boundary=----------9CL0w9YQnQWV1xj9ZEirtx
+Subject:
+ $this->{test_web}.AnotherTopic:
+ HTML with script
+From: "Ally Gator" <ally@masai.mara>
+To: "The Wiki" <wiki@some.company>
+Date: Thu, 28 Jan 2010 21:38:09 +0200
+MIME-Version: 1.0
+Message-ID: <op.u69ctvmdmjv6gc@michaeltempest>
+User-Agent: Opera Mail/10.10 (Win32)
+
+------------9CL0w9YQnQWV1xj9ZEirtx
+Content-Type: text/plain; charset=iso-8859-15; format=flowed; delsp=yes
+Content-Transfer-Encoding: 7bit
+
+2B, or not 2B; that is the pencil!
+------------9CL0w9YQnQWV1xj9ZEirtx
+Content-Type: multipart/related; boundary=----------9CL0w9YQnQWV1xyG7rilDq
+
+------------9CL0w9YQnQWV1xyG7rilDq
+Content-Type: text/html; charset=iso-8859-15
+Content-ID: <op.1264707489187.5f8f6d546d5d5d13@172.16.19.1>
+Content-Transfer-Encoding: Quoted-Printable
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML>
+<HEAD><STYLE type="text/css">BODY { color:#3050a0; }</STYLE></HEAD>
+<BODY style=3D"font-weight:bold"><script type="text/javascript"> bl=
+ah blah blah blah blah</script><DIV><FONT face=3D"G=
+eorgia" onclick="hello()">Mar<em>mel</em>ade</FONT></DIV></BODY></HTML>
+------------9CL0w9YQnQWV1xyG7rilDq--
+
+------------9CL0w9YQnQWV1xj9ZEirtx--
+
+HERE
+
 my %expectedContent = (
     complexText => <<'HERE',
 Dear Bill
@@ -521,6 +635,10 @@ HERE
     plainHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-weight:bold"><DIV><FONT face="Georgia">Mar<em>mel</em>ade</FONT></DIV></div></div></literal>'."\n",
 
     inlineImageHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="%ATTACHURLPATH%/za.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
+
+    inlineImageRemovedHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
+
+    inlineImageMadeExternalHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="http://www.example.com/turkey.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
 
     image => # FamFamFamContrib's za.png
     "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52\x00\x00\x00".
@@ -589,168 +707,269 @@ HERE
 
 my @tests = (
     {
+        name => 'plainTextNoMimeHeadersAsText',
+        message => $plainTextMessageNoMimeHeaders,
+        content => { type => 'text', processors => [] },
+        subject => '$this->{test_web}.AnotherTopic: Plain Text',
+        match => {text => $expectedContent{complexText}},
+    },
+    {
+        name => 'plainTextNoMimeHeadersAsHtml',
+        message => $plainTextMessageNoMimeHeaders,
+        content => { type => 'html', processors => [] },
+        subject => '$this->{test_web}.AnotherTopic: Plain Text',
+        match => {text => $expectedContent{complexText}},
+    },
+    {
         name => 'plainTextAsText',
         message => $plainTextMessage,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => 'complexText'},
+        match => {text => $expectedContent{complexText}},
     },
     {
         name => 'plainTextAsHtml',
         message => $plainTextMessage,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => 'complexText'},
+        match => {text => $expectedContent{complexText}},
     },
     {
         name => 'plainTextWithAttachedImageAsText',
         message => $plainTextMessageWithImageAttached,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with image attached',
-        match => {text => 'plainText', attach => {'za.png' => 'image'}},
+        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
     },
     {
         name => 'plainTextWithAttachedImageAsHtml',
         message => $plainTextMessageWithImageAttached,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with image attached',
-        match => {text => 'plainText', attach => {'za.png' => 'image'}},
+        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
     },
     {
         name => 'plainTextWithAttachedTextAsText',
         message => $plainTextMessageWithTextAttached,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with text attached',
-        match => {text => 'plainText', attach => {'plain.txt' => 'textFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
     },
     {
         name => 'plainTextWithAttachedTextAsHtml',
         message => $plainTextMessageWithTextAttached,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with text attached',
-        match => {text => 'plainText', attach => {'plain.txt' => 'textFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
     },
     {
         name => 'plainTextWithAttachedHtmlAsText',
         message => $plainTextMessageWithHtmlAttached,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
-        match => {text => 'plainText', attach => {'simple.html' => 'htmlFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
     },
     {
         name => 'plainTextWithAttachedHtmlAsHtml',
         message => $plainTextMessageWithHtmlAttached,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
-        match => {text => 'plainText', attach => {'simple.html' => 'htmlFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
     },
     {
         name => 'alternateTextAsText',
         message => $htmlWithTextMessage,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML',
-        match => {text => 'plainText'},
+        match => {text => $expectedContent{plainText}},
     },
     {
         name => 'alternateTextAsHtml',
         message => $htmlWithTextMessage,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML',
-        match => {text => 'plainHtml'},
+        match => {text => $expectedContent{plainHtml}},
     },
     {
         name => 'alternateTextWithInlineImageAsText',
         message => $htmlWithTextMessageWithInlineImage,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => 'plainText'},
+        match => {text => $expectedContent{plainText}},
     },
     {
         name => 'alternateTextWithInlineImageAsHtml',
         message => $htmlWithTextMessageWithInlineImage,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => 'inlineImageHtml', attach => {'za.png' => 'image'}},
+        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
     },
     {
         name => 'alternateTextWithAttachedImageAsText',
         message => $htmlWithTextMessageWithAttachedImage,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with image attached',
-        match => {text => 'plainText', attach => {'za.png' => 'image'}},
+        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
     },
     {
         name => 'alternateTextWithAttachedImageAsHtml',
         message => $htmlWithTextMessageWithAttachedImage,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with image attached',
-        match => {text => 'plainHtml', attach => {'za.png' => 'image'}},
+        match => {text => $expectedContent{plainHtml}, attach => {'za.png' => 'image'}},
     },
     {
         name => 'alternateTextWithAttachedTextAsText',
         message => $htmlWithTextMessageWithTextAttached,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with text attachment',
-        match => {text => 'plainText', attach => {'plain.txt' => 'textFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
     },
     {
         name => 'alternateTextWithAttachedTextAsHtml',
         message => $htmlWithTextMessageWithTextAttached,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with text attachment',
-        match => {text => 'plainHtml', attach => {'plain.txt' => 'textFile'}},
+        match => {text => $expectedContent{plainHtml}, attach => {'plain.txt' => 'textFile'}},
     },
     {
         name => 'alternateTextWithAttachedHtmlAsText',
         message => $htmlWithTextMessageWithHtmlAttached,
-        as => 'text',
+        content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with HTML attachment',
-        match => {text => 'plainText', attach => {'simple.html' => 'htmlFile'}},
+        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
     },
     {
         name => 'alternateTextWithAttachedHtmlAsHtml',
         message => $htmlWithTextMessageWithHtmlAttached,
-        as => 'html',
+        content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with HTML attachment',
-        match => {text => 'plainHtml', attach => {'simple.html' => 'htmlFile'}},
+        match => {text => $expectedContent{plainHtml}, attach => {'simple.html' => 'htmlFile'}},
+    },
+    {
+        name => 'OnlyHtmlAsHtml',
+        message => $htmlNoTextMessage,
+        content => { type => 'html', processors => [] },
+        subject => '$this->{test_web}.AnotherTopic: HTML',
+        match => {text => $expectedContent{plainHtml}},
+    },
+    {
+        name => 'htmlWithScript',
+        message => $htmlWithScript,
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::NoScript'} 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with script',
+        match => {text => $expectedContent{plainHtml}},
+    },
+    {
+        name => 'htmlRemoveInlineImage',
+        message => $htmlWithTextMessageWithInlineImage,
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent'} 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageRemovedHtml}},
+    },
+    {
+        name => 'htmlInlineImageNotConsideredExternalNoDomains',
+        message => $htmlWithTextMessageWithInlineImage,
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources'} 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
+    },
+    {
+        name => 'htmlInlineImageNotConsideredExternalWithDomains',
+        message => $htmlWithTextMessageWithInlineImage,
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                         safedomains => 'www.example.com'
+                       } 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
+    },
+    {
+        name => 'htmlExternalImageNotConsideredInline',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent'} 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+    },
+    {
+        name => 'htmlExternalImageRemoved',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources'} 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageRemovedHtml}},
+    },
+    {
+        name => 'htmlSafeDomainExternalImageNotRemoved',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                         safedomains => 'www.example.com'
+                       } 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+    },
+    {
+        name => 'htmlSafeWildcardDomainExternalImageNotRemoved',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                         safedomains => '*.example.com'
+                       } 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+    },
+    {
+        name => 'htmlUnsafeDomainExternalImageRemoved1',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                         safedomains => 'other.org'
+                       } 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageRemovedHtml}},
+    },
+    {
+        name => 'htmlUnsafeDomainExternalImageRemoved2',
+        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
+        content => { type => 'html', 
+                     processors => [
+                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                         safedomains => 'other.example.com'
+                       } 
+                     ] },
+        subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
+        match => {text => $expectedContent{inlineImageRemovedHtml}},
     },
 );
 
-# Done:
-# plain text
-# plain text with image attachment
-# plain text with text attachment
-# plain text with HTML attachment
-# HTML with text alternate
-# HTML with text alternate, with inline image
-# HTML with text alternate, with image as attachment
-# HTML with text alternate, with text attachment
-# HTML with text alternate, with HTML attachment
-#  - as text
-#  - as HTML
-
-# TODO
-# bare plain text (no MIME headers)
-# pure-HTML
-# pure-HTML with inline image
-# pure-HTML with image as attachment
-# pure-HTML with text attachment
-# pure-HTML with HTML attachment
-#  - as text
-#  - as HTML
-#  - as plain HTML
-#
-# plain text
-# plain text with image attachment
-# plain text with text attachment
-# plain text with HTML attachment
-# HTML with text alternate
-# HTML with text alternate, with inline image
-# HTML with text alternate, with image as attachment
-# HTML with text alternate, with text attachment
-# HTML with text alternate, with HTML attachment
-#  - as plain HTML
-#
+sub _replaceInlineImageWithExternalImage {
+    my $x = shift;
+    $x =~ s{"cid:[^"]*"}{"http://www.example.com/turkey.png"};
+    return $x;
+}
 
 sub doOneMimeMessage {
     my $this = shift;
@@ -761,7 +980,7 @@ sub doOneMimeMessage {
     $this->sendTestMail( $mail );
 
     $this->{MIC_box}->{topicPath} = 'subject';
-    $this->{MIC_box}->{content}->{type} = $datum->{as};
+    $this->{MIC_box}->{content} = $datum->{content};
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
 
@@ -772,8 +991,10 @@ sub doOneMimeMessage {
     my $subject = $datum->{subject};
     $subject =~ s/\$this->{test_web}/$this->{test_web}/g;
     $this->assert( 0, $t ) unless $t =~ s/^\s*\*\s*\*$subject\*: //s;
+    my $expected = $datum->{match}->{text};
+    $expected = $datum->{processText}->($this, $expected) if $datum->{processText};
     $this->assert( 0, $t ) 
-      unless $t =~ s/^\Q$expectedContent{$datum->{match}->{text}}\E\s*//s;
+      unless $t =~ s/^\Q$expected\E\s*//s;
     $this->assert( 0, $t )
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
@@ -824,3 +1045,4 @@ sub gen_tests {
 gen_tests();
 
 1;
+

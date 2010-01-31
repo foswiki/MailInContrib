@@ -145,9 +145,11 @@ sub processInbox {
     $box->{onNoTopic}  ||= 'error';
     $box->{onError}    ||= 'log';
     $box->{onSuccess}  ||= 'log';
-
-    # Copy the valid domain pattern for external resource URLs (img, script, style)
-    $this->{validUrlPattern} = $box->{validUrlPattern};
+    $box->{content}->{type} ||= 'text';
+    $box->{content}->{processors} ||= [
+        { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
+        { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
+    ];
 
     # Load the mail templates
     Foswiki::Func::loadTemplate('MailInContrib');
@@ -298,15 +300,6 @@ sub processInbox {
                 my @attachments = ();
                 my $body        = '';
 
-                unless ($this->{validUrlPattern}) {
-                    # Default to files attached to this wiki and files in the mail message
-                    my $puburl = Foswiki::Func::expandCommonVariables(
-                        '%PUBURL%',
-                        $topic, $web
-                    );
-                    $this->{validUrlPattern} = qr/cid:|\Q$puburl/;
-                }
-
                 $this->_extract( $mail, \$body, \@attachments, $box );
 
                 print "Received mail from $sender for $web.$topic\n";
@@ -382,8 +375,11 @@ sub _onError {
 
 sub _extract {
     my ( $this, $mime, $text, $attach, $box ) = @_;
-    $box->{content}{type} ||= '';
-    if ($box->{content}{type} =~ /html/) {
+
+    if ($box->{content}->{type} =~ /debug/i) {
+        $$text .= "<verbatim>" . $mime->as_string . "</verbatim>";
+    }
+    elsif ($box->{content}->{type} =~ /html/i) {
         $this->_extractHtmlAndAttachments($mime, $text, $attach, $box->{content});
     }
     else {
@@ -414,7 +410,7 @@ sub _extractHtmlAndAttachments {
     }
     elsif ( $ct =~ m[text/html] and $dp =~ /inline/ ) {
         print STDERR "Extracting text/html\n" if $this->{debug};
-        _extractPlainHtml($mime, $text, $options);
+        $this->_extractPlainHtml($mime, $text, $options);
     }
     else {
         print STDERR "Extracting plain text and attachments\n" if $this->{debug};
@@ -445,7 +441,7 @@ sub _extractMultipartAlternative {
 
     # Pick one
     my $found;
-    if ($multipartRelatedAlternate and $options->{type} !~ /plain/) {
+    if ($multipartRelatedAlternate) {
         $found = $this->_extractMultipartHtml($multipartRelatedAlternate->{mime}, $text, $attach, $options);
         print STDERR "Found multipart/related HTML\n" if $found and $this->{debug};
     }
@@ -470,7 +466,7 @@ sub _extractMultipartHtml {
     my ($htmlBit) = grep { $_->{ct} =~ m[text/html] and $_->{dp} =~ /inline/ } @bits;
     return unless $htmlBit; # Not found
 
-    my $html = $this->_extractAndTrimHtml($htmlBit->{mime});
+    my $html = $this->_extractAndTrimHtml($htmlBit->{mime}, $options);
     return unless $html;
     for my $bit (grep { $_ != $htmlBit } @bits)
     {
@@ -500,14 +496,14 @@ sub _extractMultipartHtml {
 
 sub _extractPlainHtml {
     my ( $this, $mime, $text, $options ) = @_;
-    my $html = $this->_extractAndTrimHtml($mime);
+    my $html = $this->_extractAndTrimHtml($mime, $options);
     return unless $html;
-    $$text .= "<literal><div class=\"foswikiMailInContribPlainHtml\">$html</div></literal>\n";
+    $$text .= "<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
     return 1;
 }
 
 sub _extractAndTrimHtml {
-    my ($this, $mime) = @_;
+    my ($this, $mime, $options) = @_;
     return unless $mime;
     my $html = $mime->body();
     return unless $html;
@@ -517,23 +513,14 @@ sub _extractAndTrimHtml {
     # because that tag sometimes has attributes that should be retained.
     $html =~ s{.*<body([^>]*>.*)</body>.*}{<div$1</div>}is;
 
-    # Remove tags that point to external sites
-    my $validUrlPattern = $this->{validUrlPattern};
-    $html =~ s{<(script|style|img)          # opening tag
-               [^>]+                        # whitespace or attributes
-               \bsrc=                       # attribute that contains a URL that could be used as e.g. a webbug
-               (['"])                       # opening quote
-               (?!$validUrlPattern)         # Zero-width negative lookahead for valid URLs
-                                            # URLs that don't match this pattern might be evil
-               [^>]+?                       # the URL itself
-               \2                           # closing quote that matches the opening quote
-               [^>]*                        # Any other attributes or whitespace
-               (?:
-                 >.*?</\1>                  # End of tag, content, and closing tag
-               |                            #   or
-                 />                         # End of tag, and tag does not have content
-               )
-              }{<em>External link removed</em>}isgx if $validUrlPattern;
+    for my $processorCfg (@{ $options->{processors} }) {
+        my $pkg = $processorCfg->{pkg};
+        eval "use $pkg";
+        die $@ if $@;
+
+        my $processor = $pkg->new($mime, $processorCfg);
+        $processor->process($html);
+    }
 
     return unless $html =~ /\S/;
     return $html;

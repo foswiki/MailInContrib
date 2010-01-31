@@ -3,6 +3,9 @@
 <a href="http://wikiring.com"><img src="%ATTACHURL%/logo.gif" style="float:right" /></a>
 This Contrib supports the submission of content to Foswiki topics via e-mail.
 
+%TOC%
+
+---++ What it does
 Mails can be pulled out of mail folders using [[CPAN:Email::Folder::POP3][POP3]], [[CPAN:Email::Folder::IMAP][IMAP]], or anything else supported by CPAN:Email::Folder.
 
 The implementation is very simple; a script called =mailincron= is run every so often (usually by =cron= or an equivalent offline job scheduler). The script trawls the mail folders you specify and grabs messages that it recognises as being for the wiki.
@@ -29,7 +32,7 @@ Attachments to the mail get treated as attachments by Foswiki, and attached to t
 
 Note that =mailincron= will only process messages that have arrived since the last time it ran. So if there was an error adding a mail, it won't attempt to add it again even if it is still in the inbox.
 
----+ Where the mail gets added
+---++ Where the mail gets added
 By default the target topic for mail is specified in the =Subject:= of the mail. You just put Web.Topic as the first thing on the subject line, optionally followed by a colon and other subject text. If there is no web name specified, then you can configure a default web to accept those mails.
    * A mail with a =Subject:= of =Schedule.<nop>MyClass= will be saved to Schedule.<nop>MyClass
    * =Subject: Schedule.<nop>MyClass: timetable= will be saved to Schedule.<nop>MyClass
@@ -49,7 +52,7 @@ You can also define a 'spambox' for each mail folder. A spambox is a topic that 
 
 The module can use special HTML comments in the topic to decide where to insert new emails within the text.
 
-If it sees the comment =&lt;!--MAIL--&gt;= it will insert the incoming mail immediately *below* the comment. =MAIL= is rather ike a [[%SYSTEMWEB%.Macro][Foswiki macro]]; you can give it parameters. For example, =&lt;!--MAIL{where="below"}--&gt;=. The following options are available:
+If it sees the comment =&lt;!--MAIL--&gt;= it will insert the incoming mail immediately *below* the comment. =MAIL= is rather like a [[%SYSTEMWEB%.Macro][Foswiki macro]]; you can give it parameters. For example, =&lt;!--MAIL{where="below"}--&gt;=. The following options are available:
    * =where= - can be =above=, =below= (relative to the comment) =top=, =bottom= (of the topic)
    * =template= set to the name of one of the templates (see below) to change the formatting of comments. The default format is "below" format.
 
@@ -61,24 +64,118 @@ The templates are loaded from %SYSTEMWEB%/MailInContribTemplate, and the recomme
 to change the look and feel of the output pages is to copy !MailInContribTemplate as
 !MailInContribUserTemplate and edit to taste.
 
----+ Which part of the mail is added
-
-The module defaults to extracts the plain-text portion of the mail; the HTML portion (if present) is discarded. 
-When the module extracts the plain-text portion, it also discards inline images associated with the HTML (because, whilst they are part of the mail, they are not _attachments_).
-
-%X% *Experimental:*
-You can configure the module to extract the HTML portion instead, in which case the plain-text portion is discarded. The module then also extracts and attaches inline images.
-
----+ How the contributor is identified
+---++ How the contributor is identified
 The user identity is used for access control checks on the target topic, so you can use Foswiki access controls to protect target topics.
 
 You can configure the module to look at the =From:= entry in the email, and if a registered user has set that email (see %SYSTEMWEB%.ChangeEmailAddress), then they are identified as the contributor. Note that there is a security risk here, as the =From:= address in e-mail can easily be spoofed.
 
 You can also optionally set a default user for an inbox, so if the user can't be identified from the mail, it will fall back to the default.
 
+---++ Which part of the mail is added
+
+The module defaults to extracts the plain-text portion of the mail; the HTML portion (if present) is discarded. 
+When the module extracts the plain-text portion, it also discards inline images associated with the HTML (because, whilst they are part of the mail, they are not _attachments_).
+
+%X% *Experimental:*
+You can configure the module to extract the HTML portion instead, in which case the plain-text portion is discarded. The module then also extracts and attaches inline images referenced in the mail (MailInContrib discards inline images if they are not referenced).
+
+---++ Content processing
+
+You can also configure the module to process the mail content before adding to the target topic.
+
+This is particularly important for html email, which could potentially contain web bugs and/or dangerous javascript. The default processing for html email tries to remove scripts, references to resources that are not part of the mail and references to resources that are not on the same server as the wiki.
+See the [[#SecurityWarning][WARNING]], below.
+
+---+++ Available content processors
+
+   * *Foswiki::Contrib::MailInContrib::NoScript* <br />
+     Removes =script= tags and attributes like =onclick=, =onload=, =onmouseover= etc
+
+   * *Foswiki::Contrib::MailInContrib::NoInlineContent* <br />
+     Removes tags that reference content (e.g. images) contained in the message itself.
+     *Note:* This does not remove _attachments_.
+
+   * *Foswiki::Contrib::MailInContrib::FilterExternalResources* <br />
+     Removes tags (e.g. img, script and style) tags that reference content on external servers. 
+     By default, only inline content (i.e. content attached to the message) and content that might be attached to the wiki is allowed.
+     This processor is configurable via two options (pick one):
+      * =safedomains= - a comma-separated list of domains which it is safe to reference, e.g. ='example.com, intranet.example.com'=. 
+        Prefix a domain with =*.= to allow all sub-domains e.g. ='*.example.com, services.local'=. 
+        Do not include the http:// portion of the URL, that will be added automatically.
+      * =safeurlpattern= - a regular expression that matches URLs that are safe to reference. 
+        That must include the http:// portion, if any.
+
+Example:
+<verbatim>
+ {
+   folder => 'pop://example_user:password@example.com/Inbox',
+   onError => 'log',
+   onNoTopic => 'error',
+   onSuccess => 'log delete',
+   topicPath => 'to subject',
+   content => {
+     type => 'html',
+     processors => [
+       { pkg => 'Foswiki::Contrib::MailInContrib::NoScript },
+       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources', 
+         safedomains => '*.example.com' },
+     ],
+   },
+ },
+</verbatim>
+
+---+++ Creating custom content processors
+
+Content processors must be implemented as a perl Package that sub-classes =Foswiki::Contrib::MailInContrib::Filter=.
+Content processors must provide the =process= method:
+
+<verbatim>
+sub process {
+    my $this = shift;
+    # my ($content) = @_;
+    #
+    # You can work on $content in place by using the special perl
+    # variable $_[0]. These allow you to operate on $content
+    # as if it was passed by reference; for example:
+    # $_[0] =~ s/SpecialString/my alternative/ge;
+}
+</verbatim>
+
+=Foswiki::Contrib::MailInContrib::Filter= provides the following methods:
+   * =$this->options= - returns a reference to the options hash for this processor, from =$Foswiki::cfg{MailInContrib}->[...]->{content}->{processors}->[...]=
+
+   * =$this->mime= - returns the MIME object for the content being processed
+
+   * =$this->processTag($content, $filter, $handler)= - Processes =$content= as HTML, and calls a handler on each tag that matches the filter criteria.
+     The tag is replaced with the handler's return value. The =$content= is modified in-place.
+      * =$filter= is a hash reference. Keys:
+         * =tag= - value is a reference to an array of tag names to match on. If not specified, then the handler is called for all tags.
+      * =$handler= is a reference to the callback method. It is called as =$this->$handler($tagAndContent, $tagName);=
+      * Example: To remove all =table= tags: =$this->processTag( $_[0], { tag => ['table'] }, sub { return ''; } );=
+
+   * =$this->processAttribute($content, $filter, $handler)= - Processes =$content= as HTML, and calls a handler on each attribute that matches the filter criteria.
+     The attribute is replaced with the handler's return value. The =$content= is modified in-place.
+      * =$filter= is a hash reference. Keys:
+         * =tag= - value is a reference to an array of tag names to match on. If not specified, then the handler is called for all tags.
+         * =attr= - value is a reference to an array of attribute names to match on. If not specified, then the handler is called for all attributes.
+      * =$handler= is a reference to the callback method. It is called as =$this->$handler($attributeAndQuotedValue, $tagName, $attrName, $attrValue, $quote);=
+      * Example: To remove all =class= attributes from =div= and =span= tags: =$this->processAttribute( $_[0], { tag => ['div', 'span'], attr => ['class'] }, sub { return ''; } );=
+
 <!--
       * Set SHORTDESCRIPTION = %$SHORTDESCRIPTION%
 -->
+
+#SecurityWarning
+---++ WARNING
+This software is provided in the hope that it may be useful.
+The authors make no warranty, implied or otherwise, about the
+suitability of this software for safety or security purposes.
+
+The authors shall not in any case be liable for special, incidental,
+consequential, indirect or other similar damages arising from the use
+of this software.
+
+If in _any_ doubt, do not use it.
 
 ---++ Installation
 %$INSTALL_INSTRUCTIONS%
