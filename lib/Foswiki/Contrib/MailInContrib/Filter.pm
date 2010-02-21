@@ -26,25 +26,39 @@ use Assert;
 
 sub new {
     my $class = shift;
-    my $mime = shift;
+    my $box = shift;
+    my $topMime = shift;
+    my $thisMime = shift;
     my $options = shift;
 
     my $this = bless {}, $class;
 
-    $this->{mime} = $mime;
+    $this->{box} = $box;
+    $this->{topMime} = $topMime;
+    $this->{thisMime} = $thisMime;
     $this->{options} = $options;
 
     return $this;
 }
 
+sub box {
+    my $this = shift;
+    return $this->{box};
+}
+
 sub contentType {
     my $this = shift;
-    return $this->{mime}->content_type || 'text/plain';
+    return $this->{thisMime}->content_type || 'text/plain';
 }
 
 sub mime {
     my $this = shift;
-    return $this->{mime};
+    return $this->{thisMime};
+}
+
+sub topLevelMime {
+    my $this = shift;
+    return $this->{topMime};
 }
 
 sub options {
