@@ -187,6 +187,7 @@ sub processInbox {
         my ( $web, $topic, $user );
 
         my $subject = $mail->header('Subject');
+        my $originalSubject = $subject;
 
         my $from = $mail->header('From');
 
@@ -249,11 +250,11 @@ sub processInbox {
         if (  !$topic
             && $box->{topicPath} =~ /\bsubject\b/
             && $subject =~
-/^\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$)/
+s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$))/$box->{removeTopicFromSubject} ? '' : $1/e
           )
         {
             ( $web, $topic ) = Foswiki::Func::normalizeWebTopicName(
-                ( $1 || $box->{defaultWeb} ), $2 );
+                ( $2 || $box->{defaultWeb} ), $3 );
 
             # This time the topic doesn't have to exist
         }
@@ -264,6 +265,9 @@ sub processInbox {
 
         unless ( Foswiki::Func::webExists($web) ) {
             $topic = '';
+
+            # restore original subject in case the subject line specified a web that does not exist
+            $subject = $originalSubject; 
         }
 
         if ( !$topic ) {

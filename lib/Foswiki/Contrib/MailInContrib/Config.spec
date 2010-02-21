@@ -24,6 +24,8 @@
 #     found in the To:, the Subject: will still be parsed to try and get the
 #     topic.</li>
 #   </ul></li>
+#  <li> removeTopicFromSubject - if "true", remove the topic name from the subject
+#      (only useful if the <code>topicPath</code> contains "subject").</li>
 #  <li> folder - name of the mail folder<br />
 #      Note: support for POP3 requires that the Email::Folder::POP3
 #      module is installed. Support for IMAP requires
@@ -101,6 +103,7 @@ $Foswiki::cfg{MailInContrib} = [
    onNoTopic => 'error',
    onSuccess => 'log delete',
    topicPath => 'to subject',
+   removeTopicFromSubject => 1,
    ignoreMessageTime => 0,
    processors => [
         { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
