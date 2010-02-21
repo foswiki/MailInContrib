@@ -23,6 +23,9 @@ sub set_up {
         "" );
 
     # Patch the template path so we find our templates
+    # Note that $Foswiki::cfg{SystemWebName} does not start with _,
+    # so only the Web* topics are copied.
+    # Specifically, the MailInContribTemplate topic is *not* copied. 
     $Foswiki::cfg{TemplatePath} =~ s/$Foswiki::cfg{SystemWebName}/$this->{system_web}/g;
     $Foswiki::cfg{SystemWebName} = $this->{system_web};
 
@@ -158,6 +161,158 @@ and there is no valid default username', $c->{error}
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
     $this->assert( $t !~ /\S/, $t );
+    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+}
+
+sub testAlreadyProcessedMessageReceived {
+    my $this = shift;
+
+    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+
+    my $mail = <<HERE;
+Message-ID: message1
+Received: by zproxy.gmail.com with SMTP id x7so839218nzc
+        for <cc\@c-dot.co.uk>; Mon, 27 Feb 2006 00:34:00 -0800 (PST)
+Received: from zproxy.gmail.com ([64.233.162.200])
+      by ptb-mxcore01.plus.net with esmtp (PlusNet MXCore v2.00) id 1FDdpR-0003Rc-JG 
+      for cc\@c-dot.co.uk; Mon, 11 Jul 2106 12:13:14 +0000
+Reply-To: sender2\@example.com
+To: "$this->{test_topic} $this->{test_web}" <$this->{test_web}.$this->{test_topic}\@example.com>
+Subject: $this->{test_web}.IgnoreThis
+From: ally\@masai.mara
+
+Valid message headers 
+but with a Received header older than the timestamp
+Note that there IS a Received header that is newer than the timestamp,
+but it is ignored because MainInContrib looks for the oldest Received header.
+HERE
+
+    # Sanity check the year
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    $year += 1900;
+    $year < 2106 or
+        $this->assert(0, "Please change the year of the '11 Jul' date"
+                       . "to be a year in the future");
+
+    $this->sendTestMail($mail);
+    $this->{MIC_box}->{topicPath} = 'to';
+    $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( $t !~ /\S/, $t );
+    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+}
+
+sub testAlreadyProcessedMessageDate {
+    my $this = shift;
+
+    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+
+    my $mail = <<HERE;
+Message-ID: message1
+Date: Mon, 27 Feb 2006 00:33:58 -0800
+Reply-To: sender2\@example.com
+To: "$this->{test_topic} $this->{test_web}" <$this->{test_web}.$this->{test_topic}\@example.com>
+Subject: $this->{test_web}.IgnoreThis
+From: ally\@masai.mara
+
+Valid message headers 
+but with a Date header older than timestamp
+HERE
+    $this->sendTestMail($mail);
+    $this->{MIC_box}->{topicPath} = 'to';
+    $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( $t !~ /\S/, $t );
+    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+}
+
+sub testNotYetProcessedMessageDate {
+    my $this = shift;
+
+    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+
+    # Get the time of 2 minutes from now.
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time + 2*60);
+    $year += 1900;
+     my @abbrMon = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+     my @abbrWday = qw( Sun Mon Tue Wed Thu Fri Sat );
+     foreach ($hour, $min, $sec)
+     {
+         # Add a leading zero, if needed
+         $_ = sprintf("%02d", $_);
+     }
+
+    my $mail = <<HERE;
+Message-ID: message1
+Date: $abbrWday[$wday], $mday $abbrMon[$mon] $year $hour:$min:$sec +0000
+Reply-To: sender2\@example.com
+To: "$this->{test_topic} $this->{test_web}" <$this->{test_web}.$this->{test_topic}\@example.com>
+Subject: $this->{test_web}.IgnoreThis
+From: ally\@masai.mara
+
+Valid message headers
+but with a Date header newer than the timestamp
+HERE
+    $this->sendTestMail($mail);
+    $this->{MIC_box}->{topicPath} = 'to';
+    $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.IgnoreThis\*:\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~ 
+s/^Valid message headers\nbut with a Date header newer than the timestamp\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m;
+
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+}
+
+sub testIgnoreMessageTime {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message1
+Date: Mon, 27 Feb 2006 00:33:58 -0800
+Reply-To: sender1\@example.com
+To: $this->{test_web}.$this->{test_topic}\@example.com
+Subject: $this->{test_web}.NotHere
+From: mole\@hill
+
+Date header is before timestamp
+HERE
+    $this->sendTestMail($mail);
+    $this->{MIC_box}->{topicPath} = 'to';
+    $this->{MIC_box}->{ignoreMessageTime} = 1;
+    my $c = $this->cron();
+    $this->assert_null( $c->{error} );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~ s/^Date header is before timestamp\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
+
+    $this->assert_matches( qr/^\s*$/, $t );
     $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
 }
 
