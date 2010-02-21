@@ -33,6 +33,7 @@ Attachments to the mail get treated as attachments by Foswiki, and attached to t
 Note that =mailincron= will only process messages that have arrived since the last time it ran. So if there was an error adding a mail, it won't attempt to add it again even if it is still in the inbox.
 
 ---++ Where the mail gets added
+---+++ Which topic
 By default the target topic for mail is specified in the =Subject:= of the mail. You just put Web.Topic as the first thing on the subject line, optionally followed by a colon and other subject text. If there is no web name specified, then you can configure a default web to accept those mails.
    * A mail with a =Subject:= of =Schedule.<nop>MyClass= will be saved to Schedule.<nop>MyClass
    * =Subject: Schedule.<nop>MyClass: timetable= will be saved to Schedule.<nop>MyClass
@@ -50,6 +51,7 @@ You can also configure the module to examine the =To:= and =CC:= fields in the m
 
 You can also define a 'spambox' for each mail folder. A spambox is a topic that will take all messages that do _not_ have a valid topic.
 
+---+++ Where in the topic
 The module can use special HTML comments in the topic to decide where to insert new emails within the text.
 
 If it sees the comment =&lt;!--MAIL--&gt;= it will insert the incoming mail immediately *below* the comment. =MAIL= is rather like a [[%SYSTEMWEB%.Macro][Foswiki macro]]; you can give it parameters. For example, =&lt;!--MAIL{where="below"}--&gt;=. The following options are available:
@@ -137,7 +139,7 @@ sub process {
     # You can work on $content in place by using the special perl
     # variable $_[0]. These allow you to operate on $content
     # as if it was passed by reference; for example:
-    # $_[0] =~ s/SpecialString/my alternative/ge;
+    # $_[0] =~ s/RandomDigit/int(rand(10))/ge;
 }
 </verbatim>
 
@@ -146,18 +148,22 @@ sub process {
 
    * =$this->mime= - returns the MIME object for the content being processed
 
+   * =$this->topLevelMime= - returns the MIME object for the mail that contains this content - useful for accessing the mail headers
+
+   * =$this->box= - returns a reference to the hash for this mailbox, from =$Foswiki::cfg{MailInContrib}->[]=
+
    * =$this->processTag($content, $filter, $handler)= - Processes =$content= as HTML, and calls a handler on each tag that matches the filter criteria.
      The tag is replaced with the handler's return value. The =$content= is modified in-place.
       * =$filter= is a hash reference. Keys:
-         * =tag= - value is a reference to an array of tag names to match on. If not specified, then the handler is called for all tags.
+         * =tag= - value is a reference to an array of tag names to match on. If the array is empty, then the handler is called for all tags.
       * =$handler= is a reference to the callback method. It is called as =$this->$handler($tagAndContent, $tagName);=
       * Example: To remove all =table= tags: =$this->processTag( $_[0], { tag => ['table'] }, sub { return ''; } );=
 
    * =$this->processAttribute($content, $filter, $handler)= - Processes =$content= as HTML, and calls a handler on each attribute that matches the filter criteria.
      The attribute is replaced with the handler's return value. The =$content= is modified in-place.
       * =$filter= is a hash reference. Keys:
-         * =tag= - value is a reference to an array of tag names to match on. If not specified, then the handler is called for all tags.
-         * =attr= - value is a reference to an array of attribute names to match on. If not specified, then the handler is called for all attributes.
+         * =tag= - value is a reference to an array of tag names to match on. If the array is empty, then the handler is called for all tags.
+         * =attr= - value is a reference to an array of attribute names to match on. If the array is empty, then the handler is called for all attributes.
       * =$handler= is a reference to the callback method. It is called as =$this->$handler($attributeAndQuotedValue, $tagName, $attrName, $attrValue, $quote);=
       * Example: To remove all =class= attributes from =div= and =span= tags: =$this->processAttribute( $_[0], { tag => ['div', 'span'], attr => ['class'] }, sub { return ''; } );=
 
