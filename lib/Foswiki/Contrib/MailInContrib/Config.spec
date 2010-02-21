@@ -23,7 +23,7 @@
 #     If "to" and "subject" are both enabled, but a valid topic name is not
 #     found in the To:, the Subject: will still be parsed to try and get the
 #     topic.</li>
-#   </ul>
+#   </ul></li>
 #  <li> folder - name of the mail folder<br />
 #      Note: support for POP3 requires that the Email::Folder::POP3
 #      module is installed. Support for IMAP requires
@@ -90,6 +90,10 @@ $Foswiki::cfg{MailInContrib} = [
    onNoTopic => 'error',
    onSuccess => 'log delete',
    topicPath => 'to subject',
+   processors => [
+        { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
+        { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
+   ],
  },
 ];
 
