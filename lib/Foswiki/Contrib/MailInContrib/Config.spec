@@ -62,6 +62,17 @@
 #   where you want to save mails that don't have a valid web.topic. You must
 #   specify a full web.topicname
 #  </li>
+#  <li> ignoreMessageTime - optional. If "false" (which is the default),
+#   then the MailInContrib ignores previously-processed mail, as determined
+#   by the mail "Date". If "true", then MailInContrib does not filter mail
+#   based on the "Date" - which may be important if the interval between
+#   <code>mailincron</code> runs is less than the message propagation time
+#   or less than the error in the sending PC's clock. 
+#   <em>It is <strong>only</strong> useful to set <code>ignoreMessageTime
+#   </code> to 1 if both <code>onError</code> and <code>onSuccess</code>
+#   contain "delete".</em> Otherwise, <em>every</em> message will processed 
+#   <em>every time</em> that <code>mailincron</code> runs.
+#  </li>
 #  <li> content - optional, defaults to "extract plain text". 
 #   Specifies what part of the mail to extract and how to process it.
 #   It takes a number of fields:
@@ -90,6 +101,7 @@ $Foswiki::cfg{MailInContrib} = [
    onNoTopic => 'error',
    onSuccess => 'log delete',
    topicPath => 'to subject',
+   ignoreMessageTime => 0,
    processors => [
         { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
         { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
