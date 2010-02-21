@@ -289,7 +289,7 @@ sub processInbox {
             next unless $topic;
         }
 
-        if ( $received > $this->{lastMailIn} ) {
+        if ( $box->{ignoreMessageTime} or $received > $this->{lastMailIn} ) {
             my $err = '';
             unless ( Foswiki::Func::webExists($web) ) {
                 $err = "Web $web does not exist";
