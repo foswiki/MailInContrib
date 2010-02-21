@@ -8,13 +8,13 @@ This is a normal topic, but it is also a template file, as described in %SYSTEMW
 Each template is specified in the form of a pair of template definitions, (surrounded by verbatim tags below for readability). The template to use when inserting incoming mail in a topic is decided from the parameters in the =&lt;--MAIL-->= comment in the topic. The default template is =normal=.
 
 <verbatim>
-%TMPL:DEF{MAILIN:normal}%   * *%SUBJECT%*: %TEXT% -- %WIKIUSERNAME% - %SERVERTIME%%ATTACHMENTS%
-%TMPL:END%
+%TMPL:DEF{MAILIN:normal}%   * *%SUBJECT%*: %TEXT% -- %WIKIUSERNAME% - %SERVERTIME%
+%ATTACHMENTS%%TMPL:END%
 </verbatim>
 
 =%<nop>ATTACHMENTS%= in the previous template will be expanded to a list of attachments that came in the mail. Each attachment in the list is formatted by the following template:
 <verbatim>
-%TMPL:DEF{MAILIN:normal:ATTACHMENT}%      * %A_FILE%
+%TMPL:DEF{MAILIN:normal:ATTACHMENT}%      * [[%ATTACHURL%/%A_FILE%][%A_FILE%]]
 %TMPL:END%
 </verbatim>
 
