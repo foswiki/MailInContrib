@@ -540,6 +540,40 @@ s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
 }
 
+sub testTopicPathSubjectRemoveTopicFromSubject {
+    my $this = shift;
+
+    my $mail = <<HERE;
+Message-ID: message2
+Reply-To: sender2\@example.com
+To: "$this->{test_topic} IgnoreThis" <$this->{test_web}.IgnoreThis\@example.com>
+Subject: $this->{test_web}.$this->{test_topic}: SPAM
+From: ally\@masai.mara
+
+Message 2 text here
+HERE
+    $this->sendTestMail($mail);
+    $this->{MIC_box}->{topicPath} = 'subject';
+    $this->{MIC_box}->{removeTopicFromSubject} = 1;
+    my $c = $this->cron();
+    if ( $c->{error} ) {
+        print STDERR $c->{error}, "\n";
+        $this->assert_null( $c->{error} );
+    }
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+
+    $this->assert( 0, $t )
+      unless $t =~
+s/^\s*\*\s*\*SPAM\*: Message 2 text here\s*//s;
+    $this->assert( 0, $t )
+      unless $t =~
+s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
+    $this->assert_matches( qr/^\s*$/, $t );
+    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+}
+
 sub testTopicPathExtraTextNoWebInSubject {
     my $this = shift;
 

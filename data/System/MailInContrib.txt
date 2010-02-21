@@ -214,7 +214,7 @@ Many thanks to the following sponsors for supporting this work:
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 | Change History: | |
-| _not yet released_ | Foswikitask:Item8384: Support HTML email |
+| _not yet released_ | Foswikitask:Item8384: Support HTML email Foswikitask:Item8523: Add =configure= setting to ignore mail timestamp Foswikitask:Item8595: Remove the topic name from the subject |
 |  3 Feb 2009 | Foswikitask:Item456: ported Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
 |  10 Mar 2005 | 1.000 Initial version |
 |  Home: | Foswiki:Extensions/%TOPIC% |
