@@ -225,6 +225,41 @@ Content-Transfer-Encoding: 7bit
 
 HERE
 
+my $plainTextMessageContainingHtml = <<'HERE';
+From magic@thudisk.org Thu Jan 28 20:51:23 2010
+Return-path: <magic@thudisk.org>
+Envelope-to: www-data@tou810.localdomain
+Delivery-date: Thu, 28 Jan 2010 20:51:23 +0200
+Received: from [172.16.225.1] (helo=michaeltempest)
+	by tou810.localdomain with esmtp (Exim 4.69)
+	(envelope-from <magic@thudisk.org>)
+	id 1NaZSd-00068L-5w
+	for www-data@tou810.localdomain; Thu, 28 Jan 2010 20:51:23 +0200
+Content-Type: text/plain; charset=iso-8859-15; format=flowed; delsp=yes
+Subject: $this->{test_web}.AnotherTopic: Html As Plain Text
+From: "Ally Gator" <ally@masai.mara>
+To: "The Wiki" <wiki@some.company>
+Date: Thu, 28 Jan 2010 20:51:15 +0200
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Message-ID: <op.u69answxmjv6gc@michaeltempest>
+User-Agent: Opera Mail/10.10 (Win32)
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML>
+<HEAD></HEAD>
+<BODY style=3D"font-size:13px"><DIV><FONT face="Georgia">
+We have the Cape of Good Hope 
+</FONT><IMG src="cid:za.png@12=64707563.8aee617a41d2bf17">
+<EM>but we seem to have misplaced the superhero it came with.</EM>
+
+<img src="http://foswiki.org/pub/System/FoswikiSiteSkin/pencil.gif" alt="">
+
+<script>Hey - this isn't javascript, it is plain text</script>
+
+</DIV></BODY></HTML>
+HERE
+
 my $htmlWithTextMessage = <<'HERE';
 From magic@thudisk.org Thu Jan 28 21:38:14 2010
 Return-path: <magic@thudisk.org>
@@ -640,6 +675,22 @@ HERE
 
     inlineImageMadeExternalHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="http://www.example.com/turkey.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
 
+	htmlAsPlainText => <<'HERE',
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<HTML>
+<HEAD></HEAD>
+<BODY style=3D"font-size:13px"><DIV><FONT face="Georgia">
+We have the Cape of Good Hope 
+</FONT><IMG src="cid:za.png@12=64707563.8aee617a41d2bf17">
+<EM>but we seem to have misplaced the superhero it came with.</EM>
+
+<img src="http://foswiki.org/pub/System/FoswikiSiteSkin/pencil.gif" alt="">
+
+<script>Hey - this isn't javascript, it is plain text</script>
+
+</DIV></BODY></HTML>
+HERE
+
     image => # FamFamFamContrib's za.png
     "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52\x00\x00\x00".
     "\x10\x00\x00\x00\x0b\x08\x02\x00\x00\x00\xf9\x80\x9a\x6e\x00\x00\x00\x04\x67\x41".
@@ -963,6 +1014,18 @@ my @tests = (
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
         match => {text => $expectedContent{inlineImageRemovedHtml}},
     },
+	{
+		name => 'plainTextNotAffectedByHtmlProcessors',
+		message => $plainTextMessageContainingHtml,
+		content => { type => 'text',
+			         processors => [
+					   { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
+					   { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent' },
+					   { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
+					 ] },
+		subject => '$this->{test_web}.AnotherTopic: Html As Plain Text',
+		match => {text => $expectedContent{htmlAsPlainText}},
+	},
 );
 
 sub _replaceInlineImageWithExternalImage {
