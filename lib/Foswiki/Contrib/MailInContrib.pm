@@ -376,58 +376,71 @@ sub _onError {
 sub _extract {
     my ( $this, $mime, $text, $attach, $box ) = @_;
 
+	$this->{currentBox} = $box;
+	$this->{currentMime} = $mime;
+
     if ($box->{content}->{type} =~ /debug/i) {
         $$text .= "<verbatim>" . $mime->as_string . "</verbatim>";
     }
     elsif ($box->{content}->{type} =~ /html/i) {
-        $this->_extractHtmlAndAttachments($mime, $text, $attach, $box->{content});
+        $this->_extractHtmlAndAttachments($mime, $text, $attach);
     }
     else {
-        _extractPlainTextAndAttachments($mime, $text, $attach);
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
+sub _currentBox {
+	my $this = shift;
+	return $this->{currentBox};
+}
+
+sub _currentMime {
+	my $this = shift;
+	return $this->{currentMime};
+}
+
 sub _extractHtmlAndAttachments {
-    my ( $this, $mime, $text, $attach, $options ) = @_;
+    my ( $this, $mime, $text, $attach ) = @_;
     my $ct = $mime->content_type || 'text/plain';
     my $dp = $mime->header('Content-Disposition') || 'inline';
     print STDERR "\nContent-type: $ct\n" if $this->{debug};
     if ($ct =~ m[multipart/mixed]) {
-        $this->_extractMultipartMixed($mime, $text, $attach, $options);
+        $this->_extractMultipartMixed($mime, $text, $attach);
     }
     elsif ($ct =~ m[multipart/alternative]) {
-        $this->_extractMultipartAlternative($mime, $text, $attach, $options);
+        $this->_extractMultipartAlternative($mime, $text, $attach);
     }
     elsif ( $ct =~ m[multipart/related] ) {
         my $found;
-        $found = _extractMultipartHtml($mime, $text, $attach, $options);
+        $found = _extractMultipartHtml($mime, $text, $attach);
         print STDERR "Found multipart/related HTML\n" if $found and $this->{debug};
         if (not $found)
         {
             print STDERR "Cannot find HTML. Extracting plain text\n" if $this->{debug};
-            _extractPlainTextAndAttachments($mime, $text, $attach);
+            $this->_extractPlainTextAndAttachments($mime, $text, $attach);
         }
     }
     elsif ( $ct =~ m[text/html] and $dp =~ /inline/ ) {
         print STDERR "Extracting text/html\n" if $this->{debug};
-        $this->_extractPlainHtml($mime, $text, $options);
+        $this->_extractPlainHtml($mime, $text);
     }
     else {
         print STDERR "Extracting plain text and attachments\n" if $this->{debug};
-        _extractPlainTextAndAttachments($mime, $text, $attach);
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
 sub _extractMultipartMixed {
-    my ( $this, $mime, $text, $attach, $options ) = @_;
+    my ( $this, $mime, $text, $attach ) = @_;
     foreach my $part ( grep { $_ != $mime } $mime->parts() ) {
         print STDERR "Multipart/mixed: Recursing\n" if $this->{debug};
-        $this->_extractHtmlAndAttachments($part, $text, $attach, $options);
+        $this->_extractHtmlAndAttachments($part, $text, $attach);
     }
 }
 
 sub _extractMultipartAlternative {
-    my ( $this, $mime, $text, $attach, $options ) = @_;
+    my ( $this, $mime, $text, $attach ) = @_;
 
     print STDERR "Multipart/alternative\n" if $this->{debug};
     # See what alternatives are available
@@ -442,22 +455,22 @@ sub _extractMultipartAlternative {
     # Pick one
     my $found;
     if ($multipartRelatedAlternate) {
-        $found = $this->_extractMultipartHtml($multipartRelatedAlternate->{mime}, $text, $attach, $options);
+        $found = $this->_extractMultipartHtml($multipartRelatedAlternate->{mime}, $text, $attach);
         print STDERR "Found multipart/related HTML\n" if $found and $this->{debug};
     }
     if ($htmlAlternate and not $found) {
-        $found = $this->_extractPlainHtml($htmlAlternate->{mime}, $text, $options);
+        $found = $this->_extractPlainHtml($htmlAlternate->{mime}, $text);
         print STDERR "Found text/html\n" if $found and $this->{debug};
     }
     if (not $found)
     {
         print STDERR "Cannot find HTML - Extracting plain text\n" if $this->{debug};
-        _extractPlainTextAndAttachments($mime, $text, $attach);
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
 sub _extractMultipartHtml {
-    my ( $this, $mime, $text, $attach, $options ) = @_;
+    my ( $this, $mime, $text, $attach ) = @_;
     my @bits = map +{ 
         mime => $_, 
         ct => $_->content_type || 'text/plain', 
@@ -466,7 +479,7 @@ sub _extractMultipartHtml {
     my ($htmlBit) = grep { $_->{ct} =~ m[text/html] and $_->{dp} =~ /inline/ } @bits;
     return unless $htmlBit; # Not found
 
-    my $html = $this->_extractAndTrimHtml($htmlBit->{mime}, $options);
+    my $html = $this->_extractAndTrimHtml($htmlBit->{mime});
     return unless $html;
     for my $bit (grep { $_ != $htmlBit } @bits)
     {
@@ -495,15 +508,15 @@ sub _extractMultipartHtml {
 }
 
 sub _extractPlainHtml {
-    my ( $this, $mime, $text, $options ) = @_;
-    my $html = $this->_extractAndTrimHtml($mime, $options);
+    my ( $this, $mime, $text, $box, $topMime ) = @_;
+    my $html = $this->_extractAndTrimHtml($mime);
     return unless $html;
     $$text .= "<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
     return 1;
 }
 
 sub _extractAndTrimHtml {
-    my ($this, $mime, $options) = @_;
+    my ($this, $mime, $box, $topMime) = @_;
     return unless $mime;
     my $html = $mime->body();
     return unless $html;
@@ -513,29 +526,45 @@ sub _extractAndTrimHtml {
     # because that tag sometimes has attributes that should be retained.
     $html =~ s{.*<body([^>]*>.*)</body>.*}{<div$1</div>}is;
 
-    for my $processorCfg (@{ $options->{processors} }) {
-        my $pkg = $processorCfg->{pkg};
-        eval "use $pkg";
-        die $@ if $@;
-
-        my $processor = $pkg->new($mime, $processorCfg);
-        $processor->process($html);
-    }
+	$html = $this->_applyProcessors($mime, $html);
 
     return unless $html =~ /\S/;
     return $html;
 }
 
+sub _applyProcessors {
+    my ($this, $mimeForContent, $content) = @_;
+    return unless $mimeForContent;
+
+	my $box = $this->_currentBox();
+	return $content unless $box
+	    and $box->{content}->{processors} 
+		and ref($box->{content}->{processors}) eq 'ARRAY';
+
+	my $topMime = $this->_currentMime();
+
+    for my $processorCfg (@{ $box->{content}->{processors} }) {
+        my $pkg = $processorCfg->{pkg};
+        eval "use $pkg;";
+        die $@ if $@;
+
+        my $processor = $pkg->new($box, $topMime, $mimeForContent, $processorCfg);
+        $processor->process($content);
+    }
+
+	return $content;
+}
+
 
 # Extract plain text and attachments from the MIME
 sub _extractPlainTextAndAttachments {
-    my ( $mime, $text, $attach ) = @_;
+    my ( $this, $mime, $text, $attach ) = @_;
 
     foreach my $part ( $mime->parts() ) {
         my $ct = $part->content_type || 'text/plain';
         my $dp = $part->header('Content-Disposition') || 'inline';
         if ( $ct =~ m[text/plain] && $dp =~ /inline/ ) {
-            $$text .= $part->body();
+            $$text .= $this->_applyProcessors($part, $part->body());
         }
         elsif ( $part->filename() ) {
             push(
@@ -547,7 +576,7 @@ sub _extractPlainTextAndAttachments {
             );
         }
         elsif ( $part != $mime ) {
-            _extractPlainTextAndAttachments( $part, $text, $attach );
+            $this->_extractPlainTextAndAttachments( $part, $text, $attach );
         }
     }
 }
