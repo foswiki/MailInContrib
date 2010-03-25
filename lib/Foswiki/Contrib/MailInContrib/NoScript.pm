@@ -17,7 +17,8 @@
 #
 # As per the GPL, removal of this notice is prohibited.
 package Foswiki::Contrib::MailInContrib::NoScript;
-use base 'Foswiki::Contrib::MailInContrib::Filter';
+use Foswiki::Contrib::MailInContrib::Filter;
+our @ISA = qw( Foswiki::Contrib::MailInContrib::Filter );
 
 use strict;
 use Foswiki;

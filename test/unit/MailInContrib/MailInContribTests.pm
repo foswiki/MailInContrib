@@ -1,7 +1,8 @@
 use strict;
 
 package MailInContribTests;
-use base 'FoswikiFnTestCase';
+use FoswikiFnTestCase;
+our @ISA = qw( FoswikiFnTestCase );
 
 use Foswiki;
 use Error qw( :try );

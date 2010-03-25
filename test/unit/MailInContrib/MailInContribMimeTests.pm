@@ -1,7 +1,8 @@
 use strict;
 
 package MailInContribMimeTests;
-use base 'MailInContribTests';
+use MailInContribTests;
+our @ISA = qw( MailInContribTests );
 
 use Foswiki;
 use Error qw( :try );
