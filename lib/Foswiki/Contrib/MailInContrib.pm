@@ -46,7 +46,8 @@ BEGIN {
 
     package MIMEFolder;
 
-    use base qw/Email::Folder/;
+    use Email::Folder;
+    our @ISA = qw(      );
 
     sub bless_message {
         my $self = shift;
