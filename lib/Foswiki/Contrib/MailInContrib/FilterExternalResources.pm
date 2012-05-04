@@ -26,14 +26,15 @@ use Assert;
 
 sub process {
     my $this = shift;
+
     # my ($content) = @_;
 
     return unless $this->contentType =~ m{text/html};
 
-    if ($this->options->{safeurlpattern}) {
+    if ( $this->options->{safeurlpattern} ) {
         $this->{safeUrlPattern} = qr/$this->options->{safeurlpattern}/;
     }
-    elsif ($this->options->{safedomains}) {
+    elsif ( $this->options->{safedomains} ) {
         my @domains = split /[, ]+/, $this->options->{safedomains};
 
         for my $domain (@domains) {
@@ -50,7 +51,7 @@ sub process {
             }
         }
 
-        my $domainsPattern = join('|', @domains);
+        my $domainsPattern = join( '|', @domains );
 
         # Also allow urls on the same server (i.e. no http)
         $this->{safeUrlPattern} = qr{(?!http)|https?://(?:$domainsPattern)};
@@ -61,14 +62,17 @@ sub process {
         $this->{safeUrlPattern} = qr/(?!http)|\Q$pubUrl/;
     }
 
-    $this->processTag($_[0], { tag => [qw/script style img iframe/] }, \&_processOneTag);
-    $this->processAttribute($_[0], { attr => ['style'] }, \&_processOneAttribute);
+    $this->processTag( $_[0], { tag => [qw/script style img iframe/] },
+        \&_processOneTag );
+    $this->processAttribute( $_[0], { attr => ['style'] },
+        \&_processOneAttribute );
 }
 
 sub _processOneTag {
-    my ($this, $html, $tagName) = @_;
+    my ( $this, $html, $tagName ) = @_;
 
-    if ($html =~ /^[^>]*\bsrc\s*=\s*["'](?!$this->{safeUrlPattern})/i) {
+    if ( $html =~ /^[^>]*\bsrc\s*=\s*["'](?!$this->{safeUrlPattern})/i ) {
+
         # Remove the whole tag
         return '';
     }
@@ -77,11 +81,12 @@ sub _processOneTag {
 }
 
 sub _processOneAttribute {
-    my ($this, $html, $tagName, $attrName, $attrValue, $quote) = @_;
+    my ( $this, $html, $tagName, $attrName, $attrValue, $quote ) = @_;
 
-    if ($attrValue =~ /url.*(http.*)/i) {
+    if ( $attrValue =~ /url.*(http.*)/i ) {
         my $url = $1;
-        if ($url !~ /^$this->{safeUrlPattern}/) {
+        if ( $url !~ /^$this->{safeUrlPattern}/ ) {
+
             # remove the whole attribute
             return '';
         }

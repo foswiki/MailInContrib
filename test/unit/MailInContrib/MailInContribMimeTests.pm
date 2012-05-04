@@ -668,15 +668,23 @@ HERE
 
     plainText => "2B, or not 2B; that is the pencil!\n",
 
-    plainHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-weight:bold"><DIV><FONT face="Georgia">Mar<em>mel</em>ade</FONT></DIV></div></div></literal>'."\n",
+    plainHtml =>
+'<literal><div class="foswikiMailInContribHtml"><div style="font-weight:bold"><DIV><FONT face="Georgia">Mar<em>mel</em>ade</FONT></DIV></div></div></literal>'
+      . "\n",
 
-    inlineImageHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="%ATTACHURLPATH%/za.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
+    inlineImageHtml =>
+'<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="%ATTACHURLPATH%/za.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'
+      . "\n",
 
-    inlineImageRemovedHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
+    inlineImageRemovedHtml =>
+'<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'
+      . "\n",
 
-    inlineImageMadeExternalHtml => '<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="http://www.example.com/turkey.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'."\n",
+    inlineImageMadeExternalHtml =>
+'<literal><div class="foswikiMailInContribHtml"><div style="font-size:13px"><DIV><FONT face="Georgia">We have the Cape of Good Hope </FONT><IMG src="http://www.example.com/turkey.png"> <EM>but we seem to have misplaced the superhero it came with.</EM></DIV></div></div></literal>'
+      . "\n",
 
-	htmlAsPlainText => <<'HERE',
+    htmlAsPlainText => <<'HERE',
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
 <HTML>
 <HEAD></HEAD>
@@ -692,40 +700,40 @@ We have the Cape of Good Hope
 </DIV></BODY></HTML>
 HERE
 
-    image => # FamFamFamContrib's za.png
-    "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52\x00\x00\x00".
-    "\x10\x00\x00\x00\x0b\x08\x02\x00\x00\x00\xf9\x80\x9a\x6e\x00\x00\x00\x04\x67\x41".
-    "\x4d\x41\x00\x00\xaf\xc8\x37\x05\x8a\xe9\x00\x00\x00\x19\x74\x45\x58\x74\x53\x6f".
-    "\x66\x74\x77\x61\x72\x65\x00\x41\x64\x6f\x62\x65\x20\x49\x6d\x61\x67\x65\x52\x65".
-    "\x61\x64\x79\x71\xc9\x65\x3c\x00\x00\x02\x14\x49\x44\x41\x54\x78\xda\x62\x60\x68".
-    "\x15\x66\x68\xe5\xf7\xde\x5f\x7e\xf3\xe2\xe9\xcf\xea\xea\x7f\x19\x18\x20\xe8\x37".
-    "\x03\xc3\x4f\x06\x86\xef\x0c\x0c\x5f\x19\x18\x3e\x33\x30\x7c\x64\x60\x78\xcf\xc0".
-    "\xf0\x96\x81\x01\x20\x80\x18\x1b\x0f\x33\xfc\x62\x9d\xc2\xf0\xef\x8f\xb8\x90\x74".
-    "\x90\x98\xad\xe8\xde\x23\x2c\x47\x8f\x31\xfc\xfd\xfd\xff\xcf\x1f\x86\x3f\x7f\xfe".
-    "\xff\x06\x31\xe0\xe4\x97\x4d\x9b\x00\x02\x88\xc5\xe8\x06\x83\x59\xf8\xe7\xda\x33".
-    "\x5f\x1e\x3e\x7c\x79\xea\xc5\xe5\x72\x87\x44\xd5\x6f\x5f\x58\x8e\x9d\xfe\xff\xe0".
-    "\x1e\x48\xdd\xaf\xdf\xff\x7f\xff\xfa\xff\xeb\x17\x90\xcd\x28\x2b\xfb\x8f\x81\x01".
-    "\x20\x00\x00\x31\x00\xce\xff\x01\x00\x00\x00\xc9\xc1\x7e\x21\x27\xea\x83\xd7\x0a".
-    "\xe7\xf8\x04\xfd\xfd\xf7\x73\x31\x68\x24\x06\x0f\x12\xde\xe6\xff\xf5\xf5\xff\xfe".
-    "\xfe\xff\xfe\xfd\xff\xfd\xfe\xff\xfe\xfe\x01\x09\x0a\xf1\xab\xab\x02\x08\xa4\xa1".
-    "\xac\xac\x4c\x47\xe3\x85\x83\x2d\xc3\xc4\x07\x9c\x4f\xff\xb0\xbe\xfb\xf5\xf3\xef".
-    "\x7f\x06\x0e\x66\x8e\xbf\xff\xfe\xfc\xfe\x0b\x41\x20\x37\xc9\xf0\x88\x6f\x98\x34".
-    "\x11\x20\x80\x58\x80\x1a\xfe\xfc\xf9\xbb\x71\xeb\xd7\xd7\xef\x99\xcb\xfc\xbe\x77".
-    "\xde\xe7\x78\xfd\x8f\xeb\xc7\x9f\x6f\x9f\x3f\xbf\xf8\xf5\xf7\xf7\xaf\xbf\xbf\x80".
-    "\xaa\x7f\xfd\xfb\x0d\xd4\xc6\xfe\xf7\x27\xc3\x0b\x06\x80\x00\x02\x69\xf8\xfb\xf7".
-    "\x8f\x9b\x13\x93\xb3\xfd\xbf\xd9\x0f\xd8\x1e\xfc\x64\xfd\xf1\xe7\xeb\x9f\xff\xff".
-    "\xb8\xb8\x85\xd9\xfe\xfe\x03\x99\xfd\xf7\xcf\x1f\xa0\x86\x7f\x7f\x78\xb8\x44\x18".
-    "\x78\x18\x00\x02\x08\xa4\xc1\xdf\x9d\x51\x43\x97\xb1\xe3\x26\xf7\xa5\xcf\x2c\xbf".
-    "\x7e\x7d\x9d\x6c\x53\xcf\xcd\xc4\xfd\xe6\x2e\xf7\xb7\x2f\x7f\xff\xfe\x05\xfb\xe2".
-    "\x1f\xd0\x17\xff\x78\xb8\x59\x64\xd4\xd2\x00\x02\x88\x65\x7e\x33\x83\xba\x19\x4b".
-    "\xee\x49\xbe\x37\x5f\xff\x30\xb0\xfe\x2e\x36\x49\xd8\xbd\x9c\x75\xf3\xda\xf7\x2f".
-    "\x5e\x3f\x03\x1a\x0b\x0e\xa4\x7f\x40\x2b\x80\x48\x45\x85\xf3\xe2\xc5\x5d\x00\x01".
-    "\xc4\xf2\xcf\x8b\xa1\xe6\x22\x37\x17\x13\xb3\x85\xbc\x68\x98\x94\xff\x8e\x79\x9c".
-    "\x67\xce\x7d\xe1\xe6\x63\x90\xe7\xe2\x04\xb9\xe3\x0f\x30\x02\xfe\x01\xed\xf9\xfb".
-    "\x17\x48\x02\x5d\xf3\x0f\x20\x80\x18\x19\x32\x81\xbe\x66\x10\xb7\xb0\xae\x13\x98".
-    "\x90\x1d\xfc\x8a\x01\xe8\x2f\x86\x7f\x60\xf4\x0b\xc6\xf8\x03\x46\x0c\x60\x92\x0d".
-    "\x20\xc0\x00\xe0\x42\x2e\x5f\x1b\x8f\xa6\x43\x00\x00\x00\x00\x49\x45\x4e\x44\xae".
-    "\x42\x60\x82",
+    image =>    # FamFamFamContrib's za.png
+"\x89\x50\x4e\x47\x0d\x0a\x1a\x0a\x00\x00\x00\x0d\x49\x48\x44\x52\x00\x00\x00"
+      . "\x10\x00\x00\x00\x0b\x08\x02\x00\x00\x00\xf9\x80\x9a\x6e\x00\x00\x00\x04\x67\x41"
+      . "\x4d\x41\x00\x00\xaf\xc8\x37\x05\x8a\xe9\x00\x00\x00\x19\x74\x45\x58\x74\x53\x6f"
+      . "\x66\x74\x77\x61\x72\x65\x00\x41\x64\x6f\x62\x65\x20\x49\x6d\x61\x67\x65\x52\x65"
+      . "\x61\x64\x79\x71\xc9\x65\x3c\x00\x00\x02\x14\x49\x44\x41\x54\x78\xda\x62\x60\x68"
+      . "\x15\x66\x68\xe5\xf7\xde\x5f\x7e\xf3\xe2\xe9\xcf\xea\xea\x7f\x19\x18\x20\xe8\x37"
+      . "\x03\xc3\x4f\x06\x86\xef\x0c\x0c\x5f\x19\x18\x3e\x33\x30\x7c\x64\x60\x78\xcf\xc0"
+      . "\xf0\x96\x81\x01\x20\x80\x18\x1b\x0f\x33\xfc\x62\x9d\xc2\xf0\xef\x8f\xb8\x90\x74"
+      . "\x90\x98\xad\xe8\xde\x23\x2c\x47\x8f\x31\xfc\xfd\xfd\xff\xcf\x1f\x86\x3f\x7f\xfe"
+      . "\xff\x06\x31\xe0\xe4\x97\x4d\x9b\x00\x02\x88\xc5\xe8\x06\x83\x59\xf8\xe7\xda\x33"
+      . "\x5f\x1e\x3e\x7c\x79\xea\xc5\xe5\x72\x87\x44\xd5\x6f\x5f\x58\x8e\x9d\xfe\xff\xe0"
+      . "\x1e\x48\xdd\xaf\xdf\xff\x7f\xff\xfa\xff\xeb\x17\x90\xcd\x28\x2b\xfb\x8f\x81\x01"
+      . "\x20\x00\x00\x31\x00\xce\xff\x01\x00\x00\x00\xc9\xc1\x7e\x21\x27\xea\x83\xd7\x0a"
+      . "\xe7\xf8\x04\xfd\xfd\xf7\x73\x31\x68\x24\x06\x0f\x12\xde\xe6\xff\xf5\xf5\xff\xfe"
+      . "\xfe\xff\xfe\xfd\xff\xfd\xfe\xff\xfe\xfe\x01\x09\x0a\xf1\xab\xab\x02\x08\xa4\xa1"
+      . "\xac\xac\x4c\x47\xe3\x85\x83\x2d\xc3\xc4\x07\x9c\x4f\xff\xb0\xbe\xfb\xf5\xf3\xef"
+      . "\x7f\x06\x0e\x66\x8e\xbf\xff\xfe\xfc\xfe\x0b\x41\x20\x37\xc9\xf0\x88\x6f\x98\x34"
+      . "\x11\x20\x80\x58\x80\x1a\xfe\xfc\xf9\xbb\x71\xeb\xd7\xd7\xef\x99\xcb\xfc\xbe\x77"
+      . "\xde\xe7\x78\xfd\x8f\xeb\xc7\x9f\x6f\x9f\x3f\xbf\xf8\xf5\xf7\xf7\xaf\xbf\xbf\x80"
+      . "\xaa\x7f\xfd\xfb\x0d\xd4\xc6\xfe\xf7\x27\xc3\x0b\x06\x80\x00\x02\x69\xf8\xfb\xf7"
+      . "\x8f\x9b\x13\x93\xb3\xfd\xbf\xd9\x0f\xd8\x1e\xfc\x64\xfd\xf1\xe7\xeb\x9f\xff\xff"
+      . "\xb8\xb8\x85\xd9\xfe\xfe\x03\x99\xfd\xf7\xcf\x1f\xa0\x86\x7f\x7f\x78\xb8\x44\x18"
+      . "\x78\x18\x00\x02\x08\xa4\xc1\xdf\x9d\x51\x43\x97\xb1\xe3\x26\xf7\xa5\xcf\x2c\xbf"
+      . "\x7e\x7d\x9d\x6c\x53\xcf\xcd\xc4\xfd\xe6\x2e\xf7\xb7\x2f\x7f\xff\xfe\x05\xfb\xe2"
+      . "\x1f\xd0\x17\xff\x78\xb8\x59\x64\xd4\xd2\x00\x02\x88\x65\x7e\x33\x83\xba\x19\x4b"
+      . "\xee\x49\xbe\x37\x5f\xff\x30\xb0\xfe\x2e\x36\x49\xd8\xbd\x9c\x75\xf3\xda\xf7\x2f"
+      . "\x5e\x3f\x03\x1a\x0b\x0e\xa4\x7f\x40\x2b\x80\x48\x45\x85\xf3\xe2\xc5\x5d\x00\x01"
+      . "\xc4\xf2\xcf\x8b\xa1\xe6\x22\x37\x17\x13\xb3\x85\xbc\x68\x98\x94\xff\x8e\x79\x9c"
+      . "\x67\xce\x7d\xe1\xe6\x63\x90\xe7\xe2\x04\xb9\xe3\x0f\x30\x02\xfe\x01\xed\xf9\xfb"
+      . "\x17\x48\x02\x5d\xf3\x0f\x20\x80\x18\x19\x32\x81\xbe\x66\x10\xb7\xb0\xae\x13\x98"
+      . "\x90\x1d\xfc\x8a\x01\xe8\x2f\x86\x7f\x60\xf4\x0b\xc6\xf8\x03\x46\x0c\x60\x92\x0d"
+      . "\x20\xc0\x00\xe0\x42\x2e\x5f\x1b\x8f\xa6\x43\x00\x00\x00\x00\x49\x45\x4e\x44\xae"
+      . "\x42\x60\x82",
 
     htmlFile => <<'HERE',
 <html>
@@ -756,277 +764,371 @@ text file!
 HERE
 );
 
-
 my @tests = (
     {
-        name => 'plainTextNoMimeHeadersAsText',
+        name    => 'plainTextNoMimeHeadersAsText',
         message => $plainTextMessageNoMimeHeaders,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => $expectedContent{complexText}},
+        match => { text => $expectedContent{complexText} },
     },
     {
-        name => 'plainTextNoMimeHeadersAsHtml',
+        name    => 'plainTextNoMimeHeadersAsHtml',
         message => $plainTextMessageNoMimeHeaders,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => $expectedContent{complexText}},
+        match => { text => $expectedContent{complexText} },
     },
     {
-        name => 'plainTextAsText',
+        name    => 'plainTextAsText',
         message => $plainTextMessage,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => $expectedContent{complexText}},
+        match => { text => $expectedContent{complexText} },
     },
     {
-        name => 'plainTextAsHtml',
+        name    => 'plainTextAsHtml',
         message => $plainTextMessage,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: Plain Text',
-        match => {text => $expectedContent{complexText}},
+        match => { text => $expectedContent{complexText} },
     },
     {
-        name => 'plainTextWithAttachedImageAsText',
+        name    => 'plainTextWithAttachedImageAsText',
         message => $plainTextMessageWithImageAttached,
         content => { type => 'text', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with image attached',
-        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with image attached',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'plainTextWithAttachedImageAsHtml',
+        name    => 'plainTextWithAttachedImageAsHtml',
         message => $plainTextMessageWithImageAttached,
         content => { type => 'html', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with image attached',
-        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with image attached',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'plainTextWithAttachedTextAsText',
+        name    => 'plainTextWithAttachedTextAsText',
         message => $plainTextMessageWithTextAttached,
         content => { type => 'text', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with text attached',
-        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with text attached',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'plain.txt' => 'textFile' }
+        },
     },
     {
-        name => 'plainTextWithAttachedTextAsHtml',
+        name    => 'plainTextWithAttachedTextAsHtml',
         message => $plainTextMessageWithTextAttached,
         content => { type => 'html', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with text attached',
-        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with text attached',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'plain.txt' => 'textFile' }
+        },
     },
     {
-        name => 'plainTextWithAttachedHtmlAsText',
+        name    => 'plainTextWithAttachedHtmlAsText',
         message => $plainTextMessageWithHtmlAttached,
         content => { type => 'text', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
-        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'simple.html' => 'htmlFile' }
+        },
     },
     {
-        name => 'plainTextWithAttachedHtmlAsHtml',
+        name    => 'plainTextWithAttachedHtmlAsHtml',
         message => $plainTextMessageWithHtmlAttached,
         content => { type => 'html', processors => [] },
-        subject => '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
-        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
+        subject =>
+          '$this->{test_web}.AnotherTopic: Plain Text with HTML attachment',
+        match => {
+            text   => $expectedContent{plainText},
+            attach => { 'simple.html' => 'htmlFile' }
+        },
     },
     {
-        name => 'alternateTextAsText',
+        name    => 'alternateTextAsText',
         message => $htmlWithTextMessage,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML',
-        match => {text => $expectedContent{plainText}},
+        match => { text => $expectedContent{plainText} },
     },
     {
-        name => 'alternateTextAsHtml',
+        name    => 'alternateTextAsHtml',
         message => $htmlWithTextMessage,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML',
-        match => {text => $expectedContent{plainHtml}},
+        match => { text => $expectedContent{plainHtml} },
     },
     {
-        name => 'alternateTextWithInlineImageAsText',
+        name    => 'alternateTextWithInlineImageAsText',
         message => $htmlWithTextMessageWithInlineImage,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{plainText}},
+        match => { text => $expectedContent{plainText} },
     },
     {
-        name => 'alternateTextWithInlineImageAsHtml',
+        name    => 'alternateTextWithInlineImageAsHtml',
         message => $htmlWithTextMessageWithInlineImage,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
+        match   => {
+            text   => $expectedContent{inlineImageHtml},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedImageAsText',
+        name    => 'alternateTextWithAttachedImageAsText',
         message => $htmlWithTextMessageWithAttachedImage,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with image attached',
-        match => {text => $expectedContent{plainText}, attach => {'za.png' => 'image'}},
+        match   => {
+            text   => $expectedContent{plainText},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedImageAsHtml',
+        name    => 'alternateTextWithAttachedImageAsHtml',
         message => $htmlWithTextMessageWithAttachedImage,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with image attached',
-        match => {text => $expectedContent{plainHtml}, attach => {'za.png' => 'image'}},
+        match   => {
+            text   => $expectedContent{plainHtml},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedTextAsText',
+        name    => 'alternateTextWithAttachedTextAsText',
         message => $htmlWithTextMessageWithTextAttached,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with text attachment',
-        match => {text => $expectedContent{plainText}, attach => {'plain.txt' => 'textFile'}},
+        match   => {
+            text   => $expectedContent{plainText},
+            attach => { 'plain.txt' => 'textFile' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedTextAsHtml',
+        name    => 'alternateTextWithAttachedTextAsHtml',
         message => $htmlWithTextMessageWithTextAttached,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with text attachment',
-        match => {text => $expectedContent{plainHtml}, attach => {'plain.txt' => 'textFile'}},
+        match   => {
+            text   => $expectedContent{plainHtml},
+            attach => { 'plain.txt' => 'textFile' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedHtmlAsText',
+        name    => 'alternateTextWithAttachedHtmlAsText',
         message => $htmlWithTextMessageWithHtmlAttached,
         content => { type => 'text', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with HTML attachment',
-        match => {text => $expectedContent{plainText}, attach => {'simple.html' => 'htmlFile'}},
+        match   => {
+            text   => $expectedContent{plainText},
+            attach => { 'simple.html' => 'htmlFile' }
+        },
     },
     {
-        name => 'alternateTextWithAttachedHtmlAsHtml',
+        name    => 'alternateTextWithAttachedHtmlAsHtml',
         message => $htmlWithTextMessageWithHtmlAttached,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML with HTML attachment',
-        match => {text => $expectedContent{plainHtml}, attach => {'simple.html' => 'htmlFile'}},
+        match   => {
+            text   => $expectedContent{plainHtml},
+            attach => { 'simple.html' => 'htmlFile' }
+        },
     },
     {
-        name => 'OnlyHtmlAsHtml',
+        name    => 'OnlyHtmlAsHtml',
         message => $htmlNoTextMessage,
         content => { type => 'html', processors => [] },
         subject => '$this->{test_web}.AnotherTopic: HTML',
-        match => {text => $expectedContent{plainHtml}},
+        match => { text => $expectedContent{plainHtml} },
     },
     {
-        name => 'htmlWithScript',
+        name    => 'htmlWithScript',
         message => $htmlWithScript,
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::NoScript'} 
-                     ] },
+        content => {
+            type => 'html',
+            processors =>
+              [ { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' } ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with script',
-        match => {text => $expectedContent{plainHtml}},
+        match   => { text => $expectedContent{plainHtml} },
     },
     {
-        name => 'htmlRemoveInlineImage',
+        name    => 'htmlRemoveInlineImage',
         message => $htmlWithTextMessageWithInlineImage,
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent'} 
-                     ] },
+        content => {
+            type => 'html',
+            processors =>
+              [ { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent' } ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageRemovedHtml}},
+        match   => { text => $expectedContent{inlineImageRemovedHtml} },
     },
     {
-        name => 'htmlInlineImageNotConsideredExternalNoDomains',
+        name    => 'htmlInlineImageNotConsideredExternalNoDomains',
         message => $htmlWithTextMessageWithInlineImage,
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources'} 
-                     ] },
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+                      'Foswiki::Contrib::MailInContrib::FilterExternalResources'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
+        match   => {
+            text   => $expectedContent{inlineImageHtml},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'htmlInlineImageNotConsideredExternalWithDomains',
+        name    => 'htmlInlineImageNotConsideredExternalWithDomains',
         message => $htmlWithTextMessageWithInlineImage,
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
-                         safedomains => 'www.example.com'
-                       } 
-                     ] },
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                    safedomains => 'www.example.com'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageHtml}, attach => {'za.png' => 'image'}},
+        match   => {
+            text   => $expectedContent{inlineImageHtml},
+            attach => { 'za.png' => 'image' }
+        },
     },
     {
-        name => 'htmlExternalImageNotConsideredInline',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent'} 
-                     ] },
+        name    => 'htmlExternalImageNotConsideredInline',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type => 'html',
+            processors =>
+              [ { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent' } ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+        match   => { text => $expectedContent{inlineImageMadeExternalHtml} },
     },
     {
-        name => 'htmlExternalImageRemoved',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources'} 
-                     ] },
+        name    => 'htmlExternalImageRemoved',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+                      'Foswiki::Contrib::MailInContrib::FilterExternalResources'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageRemovedHtml}},
+        match   => { text => $expectedContent{inlineImageRemovedHtml} },
     },
     {
-        name => 'htmlSafeDomainExternalImageNotRemoved',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
-                         safedomains => 'www.example.com'
-                       } 
-                     ] },
+        name    => 'htmlSafeDomainExternalImageNotRemoved',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                    safedomains => 'www.example.com'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+        match   => { text => $expectedContent{inlineImageMadeExternalHtml} },
     },
     {
-        name => 'htmlSafeWildcardDomainExternalImageNotRemoved',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
-                         safedomains => '*.example.com'
-                       } 
-                     ] },
+        name    => 'htmlSafeWildcardDomainExternalImageNotRemoved',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                    safedomains => '*.example.com'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageMadeExternalHtml}},
+        match   => { text => $expectedContent{inlineImageMadeExternalHtml} },
     },
     {
-        name => 'htmlUnsafeDomainExternalImageRemoved1',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
-                         safedomains => 'other.org'
-                       } 
-                     ] },
+        name    => 'htmlUnsafeDomainExternalImageRemoved1',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                    safedomains => 'other.org'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageRemovedHtml}},
+        match   => { text => $expectedContent{inlineImageRemovedHtml} },
     },
     {
-        name => 'htmlUnsafeDomainExternalImageRemoved2',
-        message => _replaceInlineImageWithExternalImage($htmlWithTextMessageWithInlineImage),
-        content => { type => 'html', 
-                     processors => [
-                       { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources',
-                         safedomains => 'other.example.com'
-                       } 
-                     ] },
+        name    => 'htmlUnsafeDomainExternalImageRemoved2',
+        message => _replaceInlineImageWithExternalImage(
+            $htmlWithTextMessageWithInlineImage),
+        content => {
+            type       => 'html',
+            processors => [
+                {
+                    pkg =>
+'Foswiki::Contrib::MailInContrib::FilterExternalResources',
+                    safedomains => 'other.example.com'
+                }
+            ]
+        },
         subject => '$this->{test_web}.AnotherTopic: HTML with inline image',
-        match => {text => $expectedContent{inlineImageRemovedHtml}},
+        match   => { text => $expectedContent{inlineImageRemovedHtml} },
     },
-	{
-		name => 'plainTextNotAffectedByHtmlProcessors',
-		message => $plainTextMessageContainingHtml,
-		content => { type => 'text',
-			         processors => [
-					   { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
-					   { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent' },
-					   { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
-					 ] },
-		subject => '$this->{test_web}.AnotherTopic: Html As Plain Text',
-		match => {text => $expectedContent{htmlAsPlainText}},
-	},
+    {
+        name    => 'plainTextNotAffectedByHtmlProcessors',
+        message => $plainTextMessageContainingHtml,
+        content => {
+            type       => 'text',
+            processors => [
+                {
+                    pkg =>
+                      'Foswiki::Contrib::MailInContrib::FilterExternalResources'
+                },
+                { pkg => 'Foswiki::Contrib::MailInContrib::NoInlineContent' },
+                { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
+            ]
+        },
+        subject => '$this->{test_web}.AnotherTopic: Html As Plain Text',
+        match   => { text => $expectedContent{htmlAsPlainText} },
+    },
 );
 
 sub _replaceInlineImageWithExternalImage {
@@ -1036,15 +1138,15 @@ sub _replaceInlineImageWithExternalImage {
 }
 
 sub doOneMimeMessage {
-    my $this = shift;
+    my $this  = shift;
     my $datum = shift;
 
     my $mail = $datum->{message};
     $mail =~ s/\$this->{test_web}/$this->{test_web}/g;
-    $this->sendTestMail( $mail );
+    $this->sendTestMail($mail);
 
     $this->{MIC_box}->{topicPath} = 'subject';
-    $this->{MIC_box}->{content} = $datum->{content};
+    $this->{MIC_box}->{content}   = $datum->{content};
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
 
@@ -1056,8 +1158,9 @@ sub doOneMimeMessage {
     $subject =~ s/\$this->{test_web}/$this->{test_web}/g;
     $this->assert( 0, $t ) unless $t =~ s/^\s*\*\s*\*$subject\*: //s;
     my $expected = $datum->{match}->{text};
-    $expected = $datum->{processText}->($this, $expected) if $datum->{processText};
-    $this->assert( 0, $t ) 
+    $expected = $datum->{processText}->( $this, $expected )
+      if $datum->{processText};
+    $this->assert( 0, $t )
       unless $t =~ s/^\Q$expected\E\s*//s;
     $this->assert( 0, $t )
       unless $t =~
@@ -1066,30 +1169,34 @@ s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
 
     # Check that attachments are present
     my %expectedAttachments;
-    %expectedAttachments = %{ $datum->{match}->{attach} } if $datum->{match}->{attach};
+    %expectedAttachments = %{ $datum->{match}->{attach} }
+      if $datum->{match}->{attach};
     my @a = $m->find('FILEATTACHMENT');
-    $this->assert_equals( scalar(keys %expectedAttachments), scalar(@a) );
-    for my $attachment (@a)
-    {
-        $this->assert($attachment->{attachment});
-        exists( $expectedAttachments{ $attachment->{attachment} } ) 
-            or $this->assert(0, "Unexpected attachment: '$attachment->{attachment}'");
-        my $expectedContentKey = delete $expectedAttachments{ $attachment->{attachment} };
-        my $expectedValue = $expectedContent{ $expectedContentKey };
+    $this->assert_equals( scalar( keys %expectedAttachments ), scalar(@a) );
+    for my $attachment (@a) {
+        $this->assert( $attachment->{attachment} );
+        exists( $expectedAttachments{ $attachment->{attachment} } )
+          or $this->assert( 0,
+            "Unexpected attachment: '$attachment->{attachment}'" );
+        my $expectedContentKey =
+          delete $expectedAttachments{ $attachment->{attachment} };
+        my $expectedValue = $expectedContent{$expectedContentKey};
 
-        my $attachmentFilename = 
-                "$Foswiki::cfg{PubDir}/$this->{test_web}/AnotherTopic/$attachment->{attachment}";
-        open my $fh, "<", $attachmentFilename or $this->assert(0, "Could not open attachment '$attachmentFilename': $!");
-        local $/; # enable slurp mode
+        my $attachmentFilename =
+"$Foswiki::cfg{PubDir}/$this->{test_web}/AnotherTopic/$attachment->{attachment}";
+        open my $fh, "<", $attachmentFilename
+          or $this->assert( 0,
+            "Could not open attachment '$attachmentFilename': $!" );
+        local $/;    # enable slurp mode
         my $actualValue = <$fh>;
         $this->assert_str_equals( $expectedValue, $actualValue );
     }
 
-    for my $attachment (keys %expectedAttachments) {
-        $this->assert(0, "Missing attachment: '$attachment'");
+    for my $attachment ( keys %expectedAttachments ) {
+        $this->assert( 0, "Missing attachment: '$attachment'" );
     }
 
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub gen_tests {
