@@ -24,9 +24,9 @@ use strict;
 use Foswiki;
 use Assert;
 
-sub process {
+sub process
+{
     my $this = shift;
-
     # my ($content) = @_;
     #
     # You can work on $content in place by using the special perl
@@ -35,22 +35,20 @@ sub process {
     # $_[0] =~ s/SpecialString/my alternative/ge;
     return unless $this->contentType =~ m{text/html};
 
-    $this->processTag( $_[0], { tag => [qw/script/] }, \&_processOneTag );
-    $this->processAttribute( $_[0], {}, \&_processOneAttribute );
+    $this->processTag($_[0], { tag => [qw/script/] }, \&_processOneTag);
+    $this->processAttribute($_[0], { }, \&_processOneAttribute);
 }
 
 sub _processOneTag {
-
     # my ($this, $html, $tagName) = @_;
-
+    
     return '';
 }
 
 sub _processOneAttribute {
-    my ( $this, $html, $tagName, $attrName, $attrValue, $quote ) = @_;
+    my ($this, $html, $tagName, $attrName, $attrValue, $quote) = @_;
 
-    if ( $attrName =~ /^on/i ) {
-
+    if ($attrName =~ /^on/i) {
         # remove the whole attribute
         return '';
     }

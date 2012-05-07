@@ -34,8 +34,8 @@ use Time::ParseDate;
 use Error qw( :try );
 use Carp;
 
-our $VERSION          = '$Rev: 10183$';
-our $RELEASE          = '18 Jan 2010';
+our $VERSION = '$Rev: 10183$';
+our $RELEASE = '18 Jan 2010';
 our $SHORTDESCRIPTION = 'Supports submissions to Foswiki via e-mail';
 
 BEGIN {
@@ -141,12 +141,12 @@ sub processInbox {
     my %kill;
 
     # Set defaults if necessary
-    $box->{topicPath}             ||= 'subject';
-    $box->{defaultWeb}            ||= '';
-    $box->{onNoTopic}             ||= 'error';
-    $box->{onError}               ||= 'log';
-    $box->{onSuccess}             ||= 'log';
-    $box->{content}->{type}       ||= 'text';
+    $box->{topicPath}  ||= 'subject';
+    $box->{defaultWeb} ||= '';
+    $box->{onNoTopic}  ||= 'error';
+    $box->{onError}    ||= 'log';
+    $box->{onSuccess}  ||= 'log';
+    $box->{content}->{type} ||= 'text';
     $box->{content}->{processors} ||= [
         { pkg => 'Foswiki::Contrib::MailInContrib::NoScript' },
         { pkg => 'Foswiki::Contrib::MailInContrib::FilterExternalResources' },
@@ -154,7 +154,6 @@ sub processInbox {
 
     # Load the mail templates
     Foswiki::Func::loadTemplate('MailInContrib');
-
     # Load second so that user templates override
     Foswiki::Func::loadTemplate('MailInContribUser');
 
@@ -188,7 +187,7 @@ sub processInbox {
      #    4. Otherwise replying to the user to say "no thanks" if replyonnotopic
         my ( $web, $topic, $user );
 
-        my $subject         = $mail->header('Subject');
+        my $subject = $mail->header('Subject');
         my $originalSubject = $subject;
 
         my $from = $mail->header('From');
@@ -268,8 +267,8 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
         unless ( Foswiki::Func::webExists($web) ) {
             $topic = '';
 
-# restore original subject in case the subject line specified a web that does not exist
-            $subject = $originalSubject;
+            # restore original subject in case the subject line specified a web that does not exist
+            $subject = $originalSubject; 
         }
 
         if ( !$topic ) {
@@ -346,9 +345,9 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
         Email::Delete::delete_message(
             from     => $box->{folder},
             matching => sub {
-                my $test       = shift;
+                my $test = shift;
                 my $message_id = $test->header('Message-ID');
-                if ( defined $message_id and defined $kill{$message_id} ) {
+                if ( defined $message_id and defined $kill{ $message_id } ) {
                     print STDERR "Delete $message_id\n"
                       if $this->{debug};
                     return 1;
@@ -382,28 +381,28 @@ sub _onError {
 sub _extract {
     my ( $this, $mime, $text, $attach, $box ) = @_;
 
-    $this->{currentBox}  = $box;
-    $this->{currentMime} = $mime;
+	$this->{currentBox} = $box;
+	$this->{currentMime} = $mime;
 
-    if ( $box->{content}->{type} =~ /debug/i ) {
+    if ($box->{content}->{type} =~ /debug/i) {
         $$text .= "<verbatim>" . $mime->as_string . "</verbatim>";
     }
-    elsif ( $box->{content}->{type} =~ /html/i ) {
-        $this->_extractHtmlAndAttachments( $mime, $text, $attach );
+    elsif ($box->{content}->{type} =~ /html/i) {
+        $this->_extractHtmlAndAttachments($mime, $text, $attach);
     }
     else {
-        $this->_extractPlainTextAndAttachments( $mime, $text, $attach );
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
 sub _currentBox {
-    my $this = shift;
-    return $this->{currentBox};
+	my $this = shift;
+	return $this->{currentBox};
 }
 
 sub _currentMime {
-    my $this = shift;
-    return $this->{currentMime};
+	my $this = shift;
+	return $this->{currentMime};
 }
 
 sub _extractHtmlAndAttachments {
@@ -411,31 +410,29 @@ sub _extractHtmlAndAttachments {
     my $ct = $mime->content_type || 'text/plain';
     my $dp = $mime->header('Content-Disposition') || 'inline';
     print STDERR "\nContent-type: $ct\n" if $this->{debug};
-    if ( $ct =~ m[multipart/mixed] ) {
-        $this->_extractMultipartMixed( $mime, $text, $attach );
+    if ($ct =~ m[multipart/mixed]) {
+        $this->_extractMultipartMixed($mime, $text, $attach);
     }
-    elsif ( $ct =~ m[multipart/alternative] ) {
-        $this->_extractMultipartAlternative( $mime, $text, $attach );
+    elsif ($ct =~ m[multipart/alternative]) {
+        $this->_extractMultipartAlternative($mime, $text, $attach);
     }
     elsif ( $ct =~ m[multipart/related] ) {
         my $found;
-        $found = _extractMultipartHtml( $mime, $text, $attach );
-        print STDERR "Found multipart/related HTML\n"
-          if $found and $this->{debug};
-        if ( not $found ) {
-            print STDERR "Cannot find HTML. Extracting plain text\n"
-              if $this->{debug};
-            $this->_extractPlainTextAndAttachments( $mime, $text, $attach );
+        $found = _extractMultipartHtml($mime, $text, $attach);
+        print STDERR "Found multipart/related HTML\n" if $found and $this->{debug};
+        if (not $found)
+        {
+            print STDERR "Cannot find HTML. Extracting plain text\n" if $this->{debug};
+            $this->_extractPlainTextAndAttachments($mime, $text, $attach);
         }
     }
     elsif ( $ct =~ m[text/html] and $dp =~ /inline/ ) {
         print STDERR "Extracting text/html\n" if $this->{debug};
-        $this->_extractPlainHtml( $mime, $text );
+        $this->_extractPlainHtml($mime, $text);
     }
     else {
-        print STDERR "Extracting plain text and attachments\n"
-          if $this->{debug};
-        $this->_extractPlainTextAndAttachments( $mime, $text, $attach );
+        print STDERR "Extracting plain text and attachments\n" if $this->{debug};
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
@@ -443,7 +440,7 @@ sub _extractMultipartMixed {
     my ( $this, $mime, $text, $attach ) = @_;
     foreach my $part ( grep { $_ != $mime } $mime->parts() ) {
         print STDERR "Multipart/mixed: Recursing\n" if $this->{debug};
-        $this->_extractHtmlAndAttachments( $part, $text, $attach );
+        $this->_extractHtmlAndAttachments($part, $text, $attach);
     }
 }
 
@@ -451,69 +448,57 @@ sub _extractMultipartAlternative {
     my ( $this, $mime, $text, $attach ) = @_;
 
     print STDERR "Multipart/alternative\n" if $this->{debug};
-
     # See what alternatives are available
-    my @alternates = map +{
-        mime => $_,
-        ct   => $_->content_type || 'text/plain',
-      },
-      grep { $_ != $mime } $mime->parts();
+    my @alternates = map +{ 
+        mime => $_, 
+        ct => $_->content_type || 'text/plain', 
+      }, grep { $_ != $mime } $mime->parts();
 
-    my ($multipartRelatedAlternate) =
-      grep { $_->{ct} =~ m[multipart/related] } @alternates;
+    my ($multipartRelatedAlternate) = grep { $_->{ct} =~ m[multipart/related] } @alternates;
     my ($htmlAlternate) = grep { $_->{ct} =~ m[text/html] } @alternates;
 
     # Pick one
     my $found;
     if ($multipartRelatedAlternate) {
-        $found =
-          $this->_extractMultipartHtml( $multipartRelatedAlternate->{mime},
-            $text, $attach );
-        print STDERR "Found multipart/related HTML\n"
-          if $found and $this->{debug};
+        $found = $this->_extractMultipartHtml($multipartRelatedAlternate->{mime}, $text, $attach);
+        print STDERR "Found multipart/related HTML\n" if $found and $this->{debug};
     }
-    if ( $htmlAlternate and not $found ) {
-        $found = $this->_extractPlainHtml( $htmlAlternate->{mime}, $text );
+    if ($htmlAlternate and not $found) {
+        $found = $this->_extractPlainHtml($htmlAlternate->{mime}, $text);
         print STDERR "Found text/html\n" if $found and $this->{debug};
     }
-    if ( not $found ) {
-        print STDERR "Cannot find HTML - Extracting plain text\n"
-          if $this->{debug};
-        $this->_extractPlainTextAndAttachments( $mime, $text, $attach );
+    if (not $found)
+    {
+        print STDERR "Cannot find HTML - Extracting plain text\n" if $this->{debug};
+        $this->_extractPlainTextAndAttachments($mime, $text, $attach);
     }
 }
 
 sub _extractMultipartHtml {
     my ( $this, $mime, $text, $attach ) = @_;
-    my @bits = map +{
-        mime => $_,
-        ct   => $_->content_type || 'text/plain',
-        dp   => $_->header('Content-Disposition') || 'inline'
-      },
-      grep { $_ != $mime } $mime->parts();
-    my ($htmlBit) =
-      grep { $_->{ct} =~ m[text/html] and $_->{dp} =~ /inline/ } @bits;
-    return unless $htmlBit;    # Not found
+    my @bits = map +{ 
+        mime => $_, 
+        ct => $_->content_type || 'text/plain', 
+        dp => $_->header('Content-Disposition') || 'inline'
+      }, grep { $_ != $mime } $mime->parts();
+    my ($htmlBit) = grep { $_->{ct} =~ m[text/html] and $_->{dp} =~ /inline/ } @bits;
+    return unless $htmlBit; # Not found
 
-    my $html = $this->_extractAndTrimHtml( $htmlBit->{mime} );
+    my $html = $this->_extractAndTrimHtml($htmlBit->{mime});
     return unless $html;
-    for my $bit ( grep { $_ != $htmlBit } @bits ) {
+    for my $bit (grep { $_ != $htmlBit } @bits)
+    {
         my $filename = $bit->{mime}->filename();
-        ($filename) =
-          Foswiki::Sandbox::sanitizeAttachmentName( $bit->{mime}->filename() )
-          if defined $filename;
+        ($filename) = Foswiki::Sandbox::sanitizeAttachmentName( $bit->{mime}->filename() ) if defined $filename;
         my $cid = $bit->{mime}->header('Content-ID') || '';
         my $cid_used = '';
         print STDERR "cid:[$cid]\n" if $cid and $this->{debug};
-        if ( $cid =~ /^\s*<?((.*?)\@.*?)>?\s*$/ ) {
+        if ($cid =~ /^\s*<?((.*?)\@.*?)>?\s*$/) {
             $cid = $1;
             ($filename) = Foswiki::Sandbox::sanitizeAttachmentName($2);
-            $cid_used =
-              ( $html =~ s{"cid:\Q$cid\E"}{"%ATTACHURLPATH%/$filename"} );
+            $cid_used = ($html =~ s{"cid:\Q$cid\E"}{"%ATTACHURLPATH%/$filename"});
         }
-        if ( $filename
-            and ( $bit->{dp} !~ /inline/ or ( $cid and $cid_used ) ) )
-        {
+        if ( $filename and ($bit->{dp} !~ /inline/ or ($cid and $cid_used) ) ) {
             push(
                 @$attach,
                 {
@@ -523,8 +508,7 @@ sub _extractMultipartHtml {
             );
         }
     }
-    $$text .=
-"<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
+    $$text .= "<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
     return 1;
 }
 
@@ -532,52 +516,50 @@ sub _extractPlainHtml {
     my ( $this, $mime, $text, $box, $topMime ) = @_;
     my $html = $this->_extractAndTrimHtml($mime);
     return unless $html;
-    $$text .=
-"<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
+    $$text .= "<literal><div class=\"foswikiMailInContribHtml\">$html</div></literal>\n";
     return 1;
 }
 
 sub _extractAndTrimHtml {
-    my ( $this, $mime, $box, $topMime ) = @_;
+    my ($this, $mime, $box, $topMime) = @_;
     return unless $mime;
     my $html = $mime->body();
     return unless $html;
 
-# Remove anything outside the body tag, and change the body tag into a div tag
-# It is better to keep the body tag as a tag (and not just discard it altogether)
-# because that tag sometimes has attributes that should be retained.
+    # Remove anything outside the body tag, and change the body tag into a div tag
+    # It is better to keep the body tag as a tag (and not just discard it altogether)
+    # because that tag sometimes has attributes that should be retained.
     $html =~ s{.*<body([^>]*>.*)</body>.*}{<div$1</div>}is;
 
-    $html = $this->_applyProcessors( $mime, $html );
+	$html = $this->_applyProcessors($mime, $html);
 
     return unless $html =~ /\S/;
     return $html;
 }
 
 sub _applyProcessors {
-    my ( $this, $mimeForContent, $content ) = @_;
+    my ($this, $mimeForContent, $content) = @_;
     return unless $mimeForContent;
 
-    my $box = $this->_currentBox();
-    return $content
-      unless $box
-          and $box->{content}->{processors}
-          and ref( $box->{content}->{processors} ) eq 'ARRAY';
+	my $box = $this->_currentBox();
+	return $content unless $box
+	    and $box->{content}->{processors} 
+		and ref($box->{content}->{processors}) eq 'ARRAY';
 
-    my $topMime = $this->_currentMime();
+	my $topMime = $this->_currentMime();
 
-    for my $processorCfg ( @{ $box->{content}->{processors} } ) {
+    for my $processorCfg (@{ $box->{content}->{processors} }) {
         my $pkg = $processorCfg->{pkg};
         eval "use $pkg;";
         die $@ if $@;
 
-        my $processor =
-          $pkg->new( $box, $topMime, $mimeForContent, $processorCfg );
+        my $processor = $pkg->new($box, $topMime, $mimeForContent, $processorCfg);
         $processor->process($content);
     }
 
-    return $content;
+	return $content;
 }
+
 
 # Extract plain text and attachments from the MIME
 sub _extractPlainTextAndAttachments {
@@ -587,7 +569,7 @@ sub _extractPlainTextAndAttachments {
         my $ct = $part->content_type || 'text/plain';
         my $dp = $part->header('Content-Disposition') || 'inline';
         if ( $ct =~ m[text/plain] && $dp =~ /inline/ ) {
-            $$text .= $this->_applyProcessors( $part, $part->body() );
+            $$text .= $this->_applyProcessors($part, $part->body());
         }
         elsif ( $part->filename() ) {
             push(
