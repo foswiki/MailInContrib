@@ -26,6 +26,7 @@ use Assert;
 
 sub process {
     my $this = shift;
+
     # my ($content) = @_;
     #
     # You can work on $content in place by using the special perl
@@ -35,14 +36,17 @@ sub process {
 
     return unless $this->contentType =~ m{text/html};
 
-    $this->processTag($_[0], { tag => [qw/script style img iframe/] }, \&_processOneTag);
-    $this->processAttribute($_[0], { attr => ['style'] }, \&_processOneAttribute);
+    $this->processTag( $_[0], { tag => [qw/script style img iframe/] },
+        \&_processOneTag );
+    $this->processAttribute( $_[0], { attr => ['style'] },
+        \&_processOneAttribute );
 }
 
 sub _processOneTag {
-    my ($this, $html, $tagName) = @_;
-    
-    if ($html =~ /^[^>]*\bsrc\s*=\s*["']cid:/i) {
+    my ( $this, $html, $tagName ) = @_;
+
+    if ( $html =~ /^[^>]*\bsrc\s*=\s*["']cid:/i ) {
+
         # Remove the whole tag
         return '';
     }
@@ -51,9 +55,10 @@ sub _processOneTag {
 }
 
 sub _processOneAttribute {
-    my ($this, $html, $tagName, $attrName, $attrValue, $quote) = @_;
+    my ( $this, $html, $tagName, $attrName, $attrValue, $quote ) = @_;
 
-    if ($attrValue =~ /url.*cid:/i) {
+    if ( $attrValue =~ /url.*cid:/i ) {
+
         # remove the whole attribute
         return '';
     }

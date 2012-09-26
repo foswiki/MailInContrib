@@ -25,18 +25,18 @@ use Foswiki;
 use Assert;
 
 sub new {
-    my $class = shift;
-    my $box = shift;
-    my $topMime = shift;
+    my $class    = shift;
+    my $box      = shift;
+    my $topMime  = shift;
     my $thisMime = shift;
-    my $options = shift;
+    my $options  = shift;
 
     my $this = bless {}, $class;
 
-    $this->{box} = $box;
-    $this->{topMime} = $topMime;
+    $this->{box}      = $box;
+    $this->{topMime}  = $topMime;
     $this->{thisMime} = $thisMime;
-    $this->{options} = $options;
+    $this->{options}  = $options;
 
     return $this;
 }
@@ -68,19 +68,20 @@ sub options {
 
 sub processTag {
     my $this = shift;
+
     # my ($html, $filter, $handler) = @_;
-    my ($filter, $handler) = ($_[1], $_[2]);
+    my ( $filter, $handler ) = ( $_[1], $_[2] );
 
     my $tagPattern = '\w+';
     my @uglyTags;
-    if ($filter->{tag}) {
+    if ( $filter->{tag} ) {
 
         @uglyTags = grep { $_ =~ /^img$/i } @{ $filter->{tag} };
 
         $tagPattern = join '|', @{ $filter->{tag} };
     }
 
-    pos($_[0]) = 0;
+    pos( $_[0] ) = 0;
     $_[0] =~ s{\G(.*?)                      # HTML before the tag
                 (                           # Start of the html to process
                  <\s*($tagPattern)          #   opening tag
@@ -96,7 +97,7 @@ sub processTag {
 
     if (@uglyTags) {
         $tagPattern = join '|', @uglyTags;
-        pos($_[0]) = 0;
+        pos( $_[0] ) = 0;
         $_[0] =~ s{\G(.*?)                      # HTML before the tag
                    (                            # Start of the html to process
                      <\s*($tagPattern)          #   opening tag
@@ -110,16 +111,17 @@ sub processTag {
 
 sub processAttribute {
     my $this = shift;
+
     # my ($html, $filter, $handler) = @_;
-    my ($filter, $handler) = ($_[1], $_[2]);
+    my ( $filter, $handler ) = ( $_[1], $_[2] );
 
     my $tagPattern = '\w+';
-    if ($filter->{tag}) {
+    if ( $filter->{tag} ) {
         $tagPattern = join '|', @{ $filter->{tag} };
     }
 
     my $attrPattern = '\w+';
-    if ($filter->{attr}) {
+    if ( $filter->{attr} ) {
         $attrPattern = join '|', @{ $filter->{attr} };
     }
 
@@ -138,30 +140,31 @@ sub processAttribute {
 }
 
 sub __micf_processAllAttributes {
-    my ($this, $tagName, $attributes, $close, $attrPattern, $handler) = @_;
+    my ( $this, $tagName, $attributes, $close, $attrPattern, $handler ) = @_;
 
     my $result = "<$tagName";
 
     my $lastPos = 0;
-    while ($attributes =~ /(\s+(\w+)\s*=\s*(['"])(.*?)\3)/g) {
+    while ( $attributes =~ /(\s+(\w+)\s*=\s*(['"])(.*?)\3)/g ) {
         my $wholeAttribute = $1;
-        my $attrName = $2;
-        my $quote = $3;
-        my $attrValue = $4;
+        my $attrName       = $2;
+        my $quote          = $3;
+        my $attrValue      = $4;
 
         $lastPos = pos($attributes); # Save the position of the end of the match
 
-        if ($attrPattern and $attrName =~ /$attrPattern/) {
-            $result .= $this->$handler($wholeAttribute, $tagName, $attrName, $attrValue, $quote);
+        if ( $attrPattern and $attrName =~ /$attrPattern/ ) {
+            $result .=
+              $this->$handler( $wholeAttribute, $tagName, $attrName,
+                $attrValue, $quote );
         }
-        else
-        {
+        else {
             $result .= $wholeAttribute;
         }
     }
 
     # tolerate malformed attributes, and transfer any trailing whitespace
-    $result .= substr($attributes, $lastPos);
+    $result .= substr( $attributes, $lastPos );
 
     # close the tag
     $result .= $close;
@@ -171,6 +174,7 @@ sub __micf_processAllAttributes {
 
 sub process {
     my $this = shift;
+
     # my ($content) = @_;
     #
     # You can work on $content in place by using the special perl
@@ -178,7 +182,7 @@ sub process {
     # as if it was passed by reference; for example:
     # $_[0] =~ s/SpecialString/my alternative/ge;
 
-    ASSERT(0); # Derived classes must override this function
+    ASSERT(0);    # Derived classes must override this function
 }
 
 1;

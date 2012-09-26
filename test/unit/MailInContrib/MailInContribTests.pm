@@ -16,7 +16,8 @@ sub set_up {
     $this->SUPER::set_up();
 
     $this->{system_web} = 'TemporaryMailInContribTestsSystemWeb';
-    Foswiki::Func::createWeb( $this->{system_web}, $Foswiki::cfg{SystemWebName} );
+    Foswiki::Func::createWeb( $this->{system_web},
+        $Foswiki::cfg{SystemWebName} );
     my $adm =
       Foswiki::Func::getCanonicalUserID( $Foswiki::cfg{AdminUserWikiName} );
     $Foswiki::Plugins::SESSION->{user} = $adm;
@@ -26,8 +27,9 @@ sub set_up {
     # Patch the template path so we find our templates
     # Note that $Foswiki::cfg{SystemWebName} does not start with _,
     # so only the Web* topics are copied.
-    # Specifically, the MailInContribTemplate topic is *not* copied. 
-    $Foswiki::cfg{TemplatePath} =~ s/$Foswiki::cfg{SystemWebName}/$this->{system_web}/g;
+    # Specifically, the MailInContribTemplate topic is *not* copied.
+    $Foswiki::cfg{TemplatePath} =~
+      s/$Foswiki::cfg{SystemWebName}/$this->{system_web}/g;
     $Foswiki::cfg{SystemWebName} = $this->{system_web};
 
     $this->{session}->finish();
@@ -55,7 +57,7 @@ sub set_up {
     File::Path::mkpath("$tmp/new");
     $this->{MIC_box}->{folder} = "$tmp/";
 
-    $Foswiki::cfg{MailInContrib} = [$this->{MIC_box}];
+    $Foswiki::cfg{MailInContrib} = [ $this->{MIC_box} ];
     $this->{MIC_mails} = [];
 }
 
@@ -74,49 +76,53 @@ sub sendTestMail {
     my ( $this, $mail ) = @_;
     my $nbr = 1;
 
-    # Generates unique filenames for the mail files in the maildir 
+    # Generates unique filenames for the mail files in the maildir
     # "new mail" directory.
     #
-    # On an ext3 filesystem (and possibly others, too) Perl's readdir 
-    # returns files in hash order. The hash is created from the filename 
+    # On an ext3 filesystem (and possibly others, too) Perl's readdir
+    # returns files in hash order. The hash is created from the filename
     # and a "secret" that is different for each individual filesystem.
     # So the hash order for a fixed set of filenames varies from
     # computer to computer, but is consistent on each computer.
     # Putting the process ID in the filename should make the hash order
-    # vary from run to run on an ext3 filesystem, thus eliminating 
+    # vary from run to run on an ext3 filesystem, thus eliminating
     # accidental dependence on properties that vary between computers.
-    while ( -f "$this->{MIC_box}->{folder}new/mail".$$.$nbr ) {
+    while ( -f "$this->{MIC_box}->{folder}new/mail" . $$ . $nbr ) {
         $nbr++;
     }
-    open( F, ">$this->{MIC_box}->{folder}new/mail".$$.$nbr );
+    open( F, ">$this->{MIC_box}->{folder}new/mail" . $$ . $nbr );
     print F $mail;
     close(F);
 }
 
-sub expectedMailOrder
-{
+sub expectedMailOrder {
     my $this = shift;
-    # This function reads the list of files in the maildir directory using readdir
-    # to determine the order in which Email::Folder will return the mail messages
-    #
-    # ASSUMPTION : Email::Folder::Maildir uses readdir to get a list of files 
-    # in the maildir directory.
-    #
-    # This is true for the version packaged with Email::Folder 0.855
-    #
-    # ASSUMPTION : For a given set of filenames in a given directory, 
-    # on a given filesystem, readdir ALWAYS returns the files in the same order.
-    # It is assumed that this holds for ALL TYPES OF FILESYSTEM.
-    #
-    # The order MAY differ between different types of filesystem and between
-    # different filesystems of the same type (and therefore also between computers).
+
+# This function reads the list of files in the maildir directory using readdir
+# to determine the order in which Email::Folder will return the mail messages
+#
+# ASSUMPTION : Email::Folder::Maildir uses readdir to get a list of files
+# in the maildir directory.
+#
+# This is true for the version packaged with Email::Folder 0.855
+#
+# ASSUMPTION : For a given set of filenames in a given directory,
+# on a given filesystem, readdir ALWAYS returns the files in the same order.
+# It is assumed that this holds for ALL TYPES OF FILESYSTEM.
+#
+# The order MAY differ between different types of filesystem and between
+# different filesystems of the same type (and therefore also between computers).
     local *DIR;
     my @order;
-    opendir(DIR,"$this->{MIC_box}->{folder}new") or $this->assert(0, "Could not open '$this->{MIC_box}->{folder}new': $!");
-    foreach my $file (readdir DIR) {
-        next if $file =~ /^\./; # as suggested by DJB
+    opendir( DIR, "$this->{MIC_box}->{folder}new" )
+      or
+      $this->assert( 0, "Could not open '$this->{MIC_box}->{folder}new': $!" );
+    foreach my $file ( readdir DIR ) {
+        next if $file =~ /^\./;    # as suggested by DJB
         $file =~ s/^mail$$(\d+)$//
-            or $this->assert(0, "Mail file '$file' in $this->{MIC_box}->{folder}new has the wrong format");
+          or $this->assert( 0,
+"Mail file '$file' in $this->{MIC_box}->{folder}new has the wrong format"
+          );
         push @order, $1;
     }
     return @order;
@@ -125,14 +131,14 @@ sub expectedMailOrder
 # called from the closure which is the callback used by Net.pm
 sub sentMail {
     my ( $this, $net, $mess ) = @_;
-    push( @{$this->{MIC_mails}}, $mess );
+    push( @{ $this->{MIC_mails} }, $mess );
     return undef;
 }
 
 sub cron {
     my $this = shift;
     my $min = new Foswiki::Contrib::MailInContrib( $this->{session}, 0 );
-    $min->processInbox($this->{MIC_box});
+    $min->processInbox( $this->{MIC_box} );
     $min->wrapUp();
     return $min;
 }
@@ -162,13 +168,13 @@ and there is no valid default username', $c->{error}
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
     $this->assert( $t !~ /\S/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testAlreadyProcessedMessageReceived {
     my $this = shift;
 
-    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+    my $c = $this->cron();   # Set the working-dir timestamp to the current time
 
     my $mail = <<HERE;
 Message-ID: message1
@@ -189,11 +195,13 @@ but it is ignored because MainInContrib looks for the oldest Received header.
 HERE
 
     # Sanity check the year
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+      localtime(time);
     $year += 1900;
-    $year < 2106 or
-        $this->assert(0, "Please change the year of the '11 Jul' date"
-                       . "to be a year in the future");
+    $year < 2106
+      or $this->assert( 0,
+            "Please change the year of the '11 Jul' date"
+          . "to be a year in the future" );
 
     $this->sendTestMail($mail);
     $this->{MIC_box}->{topicPath} = 'to';
@@ -204,13 +212,13 @@ HERE
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
     $this->assert( $t !~ /\S/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testAlreadyProcessedMessageDate {
     my $this = shift;
 
-    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+    my $c = $this->cron();   # Set the working-dir timestamp to the current time
 
     my $mail = <<HERE;
 Message-ID: message1
@@ -232,24 +240,25 @@ HERE
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
     $this->assert( $t !~ /\S/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testNotYetProcessedMessageDate {
     my $this = shift;
 
-    my $c = $this->cron(); # Set the working-dir timestamp to the current time
+    my $c = $this->cron();   # Set the working-dir timestamp to the current time
 
     # Get the time of 2 minutes from now.
-    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time + 2*60);
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+      gmtime( time + 2 * 60 );
     $year += 1900;
-     my @abbrMon = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-     my @abbrWday = qw( Sun Mon Tue Wed Thu Fri Sat );
-     foreach ($hour, $min, $sec)
-     {
-         # Add a leading zero, if needed
-         $_ = sprintf("%02d", $_);
-     }
+    my @abbrMon  = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+    my @abbrWday = qw( Sun Mon Tue Wed Thu Fri Sat );
+    foreach ( $hour, $min, $sec ) {
+
+        # Add a leading zero, if needed
+        $_ = sprintf( "%02d", $_ );
+    }
 
     my $mail = <<HERE;
 Message-ID: message1
@@ -273,14 +282,14 @@ HERE
     $this->assert( 0, $t )
       unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.IgnoreThis\*:\s*//s;
     $this->assert( 0, $t )
-      unless $t =~ 
+      unless $t =~
 s/^Valid message headers\nbut with a Date header newer than the timestamp\s*//s;
     $this->assert( 0, $t )
       unless $t =~
-s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m;
+      s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m;
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testIgnoreMessageTime {
@@ -297,7 +306,7 @@ From: mole\@hill
 Date header is before timestamp
 HERE
     $this->sendTestMail($mail);
-    $this->{MIC_box}->{topicPath} = 'to';
+    $this->{MIC_box}->{topicPath}         = 'to';
     $this->{MIC_box}->{ignoreMessageTime} = 1;
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
@@ -314,7 +323,7 @@ HERE
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 # topicPath to and subject
@@ -347,7 +356,7 @@ HERE
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testSimpleTopicPathToCC {
@@ -380,7 +389,7 @@ HERE
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testQuotedNameTopicPathTo {
@@ -412,7 +421,7 @@ HERE
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testDoubleTopicPathTo {
@@ -446,9 +455,8 @@ HERE
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
-    for my $messageNumber (@messageOrder)
-    {
-        if ($messageNumber == 1) {
+    for my $messageNumber (@messageOrder) {
+        if ( $messageNumber == 1 ) {
             $this->assert( 0, $t )
               unless $t =~ s/^\s*\*\s+\*$this->{test_web}\.NotHere\*:\s*//s;
             $this->assert( 0, $t )
@@ -457,7 +465,7 @@ HERE
               unless $t =~
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s;
         }
-        elsif ($messageNumber == 2) {
+        elsif ( $messageNumber == 2 ) {
             $this->assert( 0, $t )
               unless $t =~ s/^ *\* \*$this->{test_web}\.IgnoreThis\*: //s;
             $this->assert( 0, $t )
@@ -467,12 +475,12 @@ s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_\s*//s
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
         }
         else {
-            $this->assert(0, "Unexpected message number $messageNumber");
+            $this->assert( 0, "Unexpected message number $messageNumber" );
         }
     }
 
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testTopicPathOnlyWebTopicInSubject {
@@ -505,7 +513,7 @@ s/^\s*\* \*$this->{test_web}.$this->{test_topic}\*: Message 1 text here\s*//s;
       unless $t =~
 s/^_$this->{users_web}\.MoleInnaHole\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testTopicPathExtraTextInSubject {
@@ -538,7 +546,7 @@ s/^\s*\*\s*\*$this->{test_web}.$this->{test_topic}: SPAM\*: Message 2 text here\
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testTopicPathSubjectRemoveTopicFromSubject {
@@ -554,7 +562,7 @@ From: ally\@masai.mara
 Message 2 text here
 HERE
     $this->sendTestMail($mail);
-    $this->{MIC_box}->{topicPath} = 'subject';
+    $this->{MIC_box}->{topicPath}              = 'subject';
     $this->{MIC_box}->{removeTopicFromSubject} = 1;
     my $c = $this->cron();
     if ( $c->{error} ) {
@@ -566,13 +574,12 @@ HERE
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
 
     $this->assert( 0, $t )
-      unless $t =~
-s/^\s*\*\s*\*SPAM\*: Message 2 text here\s*//s;
+      unless $t =~ s/^\s*\*\s*\*SPAM\*: Message 2 text here\s*//s;
     $this->assert( 0, $t )
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testTopicPathExtraTextNoWebInSubject {
@@ -588,7 +595,7 @@ From: ally\@masai.mara
 Message 3 text here
 HERE
     $this->sendTestMail($mail);
-    $this->{MIC_box}->{topicPath} = 'subject';
+    $this->{MIC_box}->{topicPath}  = 'subject';
     $this->{MIC_box}->{defaultWeb} = $this->{test_web};
     my $c = $this->cron();
     if ( $c->{error} ) {
@@ -601,12 +608,12 @@ HERE
 
     $this->assert( 0, $t )
       unless $t =~
-s/^\s*\*\s*\*$this->{test_topic}: SPAM\*: Message 3 text here\s*//s;
+      s/^\s*\*\s*\*$this->{test_topic}: SPAM\*: Message 3 text here\s*//s;
     $this->assert( 0, $t )
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testTopicPathSubjectToFallthru {
@@ -639,7 +646,7 @@ s/^\s*\*\s*\*$this->{test_web}.$this->{test_topic}: SPAM\*: Message 4 text here\
       unless $t =~
 s/^_$this->{users_web}\.AllyGator\s*\@\s*\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//s;
     $this->assert_matches( qr/^\s*$/, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 # defaultWeb set and unset
@@ -669,12 +676,15 @@ HERE
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, 'DangleBerries' );
 
+    $this->assert( $t =~ s/^\s*\* \*no valid topic\*: Message 1 text here$//m,
+        $t );
     $this->assert(
-        $t =~ s/^\s*\* \*no valid topic\*: Message 1 text here$//m, $t);
-    $this->assert(
-        $t =~ s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m, $t);
+        $t =~
+s/_$this->{users_web}.AllyGator \@\s+\d+\s+\w+\s+\d+\s+-\s+\d+:\d+_//m,
+        $t
+    );
     $this->assert_matches( qr/^\s*$/s, $t );
-    $this->assert_equals( 0, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testOnErrorReplyDelete {
@@ -692,7 +702,7 @@ HERE
     $this->{MIC_box}->{topicPath} = 'to';
     $this->{MIC_box}->{onError}   = 'reply delete';
     my $c = $this->cron();
-    $this->assert_equals( 1, scalar(@{$this->{MIC_mails}}) );
+    $this->assert_equals( 1, scalar( @{ $this->{MIC_mails} } ) );
 }
 
 sub testOnSuccessReplyDelete {
@@ -712,8 +722,9 @@ HERE
     $this->{MIC_box}->{onSuccess} = 'reply delete';
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
-    $this->assert_equals( 1, scalar(@{$this->{MIC_mails}}) );
-    $this->assert_matches( qr/Thank you for your successful/, $this->{MIC_mails}->[0] );
+    $this->assert_equals( 1, scalar( @{ $this->{MIC_mails} } ) );
+    $this->assert_matches( qr/Thank you for your successful/,
+        $this->{MIC_mails}->[0] );
 }
 
 # attachments
@@ -814,8 +825,9 @@ HERE
     $this->{MIC_box}->{onSuccess} = 'reply';
     my $c = $this->cron();
 
-    $this->assert_equals( 1, scalar(@{$this->{MIC_mails}}) );
-    $this->assert_matches( qr/Thank you for your successful/, $this->{MIC_mails}->[0] );
+    $this->assert_equals( 1, scalar( @{ $this->{MIC_mails} } ) );
+    $this->assert_matches( qr/Thank you for your successful/,
+        $this->{MIC_mails}->[0] );
 
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, 'AnotherTopic' );
@@ -860,8 +872,9 @@ HERE
 
     my $c = $this->cron();
     $this->assert_null( $c->{error} );
-    $this->assert_equals( 1, scalar(@{$this->{MIC_mails}}) );
-    $this->assert_matches( qr/Thank you for your successful/, $this->{MIC_mails}->[0] );
+    $this->assert_equals( 1, scalar( @{ $this->{MIC_mails} } ) );
+    $this->assert_matches( qr/Thank you for your successful/,
+        $this->{MIC_mails}->[0] );
 
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, 'TargetTopic' );
