@@ -241,7 +241,7 @@ sub processInbox {
           if ( $this->{debug} );
 
         # See if we can get a valid web.topic out of to: or cc:
-        if ( $box->{topicPath} =~ /\bto\b/ ) {
+        if ( $box->{topicPath} =~ /(^|\b)to(\b|$)/s ) {
             foreach my $target (@to) {
                 next
                   unless $target =~
@@ -261,7 +261,7 @@ sub processInbox {
         # If we didn't get the name of an existing topic from the
         # To: or CC:, use the Subject:
         if (  !$topic
-            && $box->{topicPath} =~ /\bsubject\b/
+            && $box->{topicPath} =~ /(^|\b)subject(\b|$)/
             && $subject =~
 s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:\s*|\s*$))/$box->{removeTopicFromSubject} ? '' : $1/e
           )
@@ -284,22 +284,25 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
         }
 
         if ( !$topic ) {
-            if ( $box->{onNoTopic} =~ /\berror\b/ ) {
-                $this->_onError(
-                    $box,
-                    $mail,
-                    'Could not add your submission; no valid web.topic found in'
-                      . "\nTo: "
-                      . $mail->header('To')
-                      . "\nSubject: "
-                      . $subject,
-                    \%kill,
-                    $num
-                );
-            }
-            if ( $box->{onNoTopic} =~ /\bspam\b/ ) {
-                if ( $box->{spambox} && $box->{spambox} =~ /^(.*)\.(.*)$/ ) {
-                    ( $web, $topic ) = ( $1, $2 );
+            foreach my $action ( split( /\s+/, $box->{onNoTopic} ) ) {
+                if ( $action eq 'error' ) {
+                    $this->_onError(
+                        $box,
+                        $mail,
+'Could not add your submission; no valid web.topic found in'
+                          . "\nTo: "
+                          . $mail->header('To')
+                          . "\nSubject: "
+                          . $subject,
+                        \%kill,
+                        $num
+                    );
+                }
+                elsif ( $action eq 'spam' ) {
+                    if ( $box->{spambox} && $box->{spambox} =~ /^(.*)\.(.*)$/ )
+                    {
+                        ( $web, $topic ) = ( $1, $2 );
+                    }
                 }
             }
             print STDERR "Skipping; no topic\n" if ( $this->{debug} );
@@ -333,13 +336,21 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
                 );
             }
             else {
-                if ( $box->{onSuccess} =~ /\breply\b/ ) {
-                    $this->_reply( $box, $mail,
+                foreach my $action ( split( /\s+/, $box->{onSuccess} ) ) {
+                    if ( $action eq 'log' ) {
+                        my $sender = $mail->header('From')
+                          || 'unknown';
+                        Foswiki::Func::writeWarning(
+                            "Mail from $sender accepted into $web.$topic");
+                    }
+                    elsif ( $action eq 'reply' ) {
+                        $this->_reply( $box, $mail,
 "Thank you for your successful submission to $web.$topic"
-                    );
-                }
-                if ( $box->{onSuccess} =~ /\bdelete\b/ ) {
-                    $kill{ $mail->header('Message-ID') } = $num;
+                        );
+                    }
+                    elsif ( $action eq 'delete' ) {
+                        $kill{ $mail->header('Message-ID') } = $num;
+                    }
                 }
             }
         }
@@ -376,16 +387,19 @@ sub _onError {
 
     print STDERR "ERROR: $mess\n" if ( $this->{debug} );
 
-    if ( $box->{onError} =~ /\blog\b/ ) {
-        Foswiki::Func::writeWarning($mess);
-    }
-    if ( $box->{onError} =~ /\breply\b/ ) {
-        $this->_reply( $box, $mail,
-            "Foswiki found an error in your e-mail submission\n\n$mess\n\n"
-              . $mail->as_string() );
-    }
-    if ( $box->{onError} =~ /\bdelete\b/ ) {
-        $kill->{ $mail->header('Message-ID') } = $num;
+    foreach my $action ( split( /\s+/, $box->{onError} ) ) {
+
+        if ( $action eq 'log' ) {
+            Foswiki::Func::writeWarning($mess);
+        }
+        elsif ( $action eq 'reply' ) {
+            $this->_reply( $box, $mail,
+                "Foswiki found an error in your e-mail submission\n\n$mess\n\n"
+                  . $mail->as_string() );
+        }
+        elsif ( $action eq 'delete' ) {
+            $kill->{ $mail->header('Message-ID') } = $num;
+        }
     }
 }
 
