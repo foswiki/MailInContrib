@@ -16,11 +16,11 @@ sub set_up {
     $this->SUPER::set_up();
 
     $this->{system_web} = 'TemporaryMailInContribTestsSystemWeb';
-    Foswiki::Func::createWeb( $this->{system_web},
-        $Foswiki::cfg{SystemWebName} );
     my $adm =
       Foswiki::Func::getCanonicalUserID( $Foswiki::cfg{AdminUserWikiName} );
     $Foswiki::Plugins::SESSION->{user} = $adm;
+    Foswiki::Func::createWeb( $this->{system_web},
+        $Foswiki::cfg{SystemWebName} );
     Foswiki::Func::saveTopic( $this->{system_web}, 'WebPreferences', undef,
         "" );
 
@@ -40,7 +40,7 @@ sub set_up {
     print F "0\n";
     close(F);
     $this->registerUser( 'alig', 'Ally', 'Gator',    'ally@masai.mara' );
-    $this->registerUser( 'mole', 'Mole', 'InnaHole', 'mole@hill' );
+    $this->registerUser( 'mole', 'Mole', 'InnaHole', 'mole@hill.com' );
     Foswiki::Func::saveTopic( $this->{test_web}, $this->{test_topic}, undef,
         "" );
 
@@ -182,16 +182,15 @@ Received: by zproxy.gmail.com with SMTP id x7so839218nzc
         for <cc\@c-dot.co.uk>; Mon, 27 Feb 2006 00:34:00 -0800 (PST)
 Received: from zproxy.gmail.com ([64.233.162.200])
       by ptb-mxcore01.plus.net with esmtp (PlusNet MXCore v2.00) id 1FDdpR-0003Rc-JG 
-      for cc\@c-dot.co.uk; Mon, 11 Jul 2106 12:13:14 +0000
+      for cc\@c-dot.co.uk; Mon, 11 Jul 2013 12:13:14 +0000
 Reply-To: sender2\@example.com
 To: "$this->{test_topic} $this->{test_web}" <$this->{test_web}.$this->{test_topic}\@example.com>
 Subject: $this->{test_web}.IgnoreThis
 From: ally\@masai.mara
 
-Valid message headers 
-but with a Received header older than the timestamp
-Note that there IS a Received header that is newer than the timestamp,
-but it is ignored because MainInContrib looks for the oldest Received header.
+Valid message headers but with a Received headers older than the timestamp
+which should be ignored because MailInContrib looks for the newest Received
+header.
 HERE
 
     # Sanity check the year
@@ -200,17 +199,20 @@ HERE
     $year += 1900;
     $year < 2106
       or $this->assert( 0,
-            "Please change the year of the '11 Jul' date"
-          . "to be a year in the future" );
+            "Please change the year of the '11 Jul' date in the test"
+          . "to be at least a year in the future" );
+
+    my ( $m, $t ) =
+      Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
+    $this->assert( $t !~ /\S/, $t );
 
     $this->sendTestMail($mail);
     $this->{MIC_box}->{topicPath} = 'to';
     $c = $this->cron();
     $this->assert_null( $c->{error} );
 
-    my ( $m, $t ) =
+    ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, $this->{test_topic} );
-
     $this->assert( $t !~ /\S/, $t );
     $this->assert_equals( 0, scalar( @{ $this->{MIC_mails} } ) );
 }
@@ -301,7 +303,7 @@ Date: Mon, 27 Feb 2006 00:33:58 -0800
 Reply-To: sender1\@example.com
 To: $this->{test_web}.$this->{test_topic}\@example.com
 Subject: $this->{test_web}.NotHere
-From: mole\@hill
+From: mole\@hill.com
 
 Date header is before timestamp
 HERE
@@ -335,7 +337,7 @@ Message-ID: message1
 Reply-To: sender1\@example.com
 To: $this->{test_web}.$this->{test_topic}\@example.com
 Subject: $this->{test_web}.NotHere
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -368,7 +370,7 @@ Reply-To: sender1\@example.com
 To: $this->{test_web}.NotHere\@example.com
 CC: $this->{test_web}.$this->{test_topic}\@example.com
 Subject: $this->{test_web}.NotHere
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -432,7 +434,7 @@ Message-ID: message1
 Reply-To: sender1\@example.com
 To: $this->{test_web}.$this->{test_topic}\@example.com
 Subject: $this->{test_web}.NotHere
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -491,7 +493,7 @@ Message-ID: message1
 Reply-To: sender1\@example.com
 To: $this->{test_web}.NotHere\@example.com
 Subject: $this->{test_web}.$this->{test_topic}
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -712,7 +714,7 @@ Message-ID: message1
 Reply-To: sender1\@example.com
 To: $this->{test_web}.$this->{test_topic}\@example.com
 Subject: $this->{test_web}.NotHere
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -848,7 +850,7 @@ Message-ID: message1
 Reply-To: sender1\@example.com
 To: $this->{test_web}.TargetTopic\@example.com
 Subject: Object
-From: mole\@hill
+From: mole\@hill.com
 
 Message 1 text here
 HERE
@@ -860,6 +862,7 @@ HERE
 %TMPL:DEF{MAILIN:wierd}%
 Subject: %SUBJECT%
 Body: %TEXT%
+ID: %MAILHEADER{"Message-ID"}%
 %TMPL:END%
 HERE
     Foswiki::Func::saveTopic( $this->{test_web}, 'TargetTopic', undef,
@@ -878,10 +881,10 @@ HERE
 
     my ( $m, $t ) =
       Foswiki::Func::readTopic( $this->{test_web}, 'TargetTopic' );
-
     $this->assert_matches(
-        qr/BEGIN\s*Subject: Object\s*Body: Message 1 text here\s*<!--MAIL{/s,
-        $t );
+qr/BEGIN\s*Subject: Object\s*Body: Message 1 text here\s*ID: message1\s*<!--MAIL{/s,
+        $t
+    );
 }
 
 1;

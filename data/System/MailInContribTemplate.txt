@@ -1,4 +1,4 @@
-%META:TOPICINFO{author="AdminGroup" date="1142879833" format="1.1" version="1.2"}%
+%META:TOPICINFO{author="ProjectContributor" date="1399463659" format="1.1" version="1"}%
 ---+ Templates for the MailInContrib
 
 *DO NOT MODIFY THIS TOPIC*
@@ -6,6 +6,8 @@
 This is a normal topic, but it is also a template file, as described in %SYSTEMWEB%.SkinTemplates. It contains the template definitions used by the MailInContrib to insert mail messages in topics.
 
 Each template is specified in the form of a pair of template definitions, (surrounded by verbatim tags below for readability). The template to use when inserting incoming mail in a topic is decided from the parameters in the =&lt;--MAIL-->= comment in the topic. The default template is =normal=.
+
+You can add any header you like from the mail using the =%<nop>MAILHEADER{Fieldname}% macro. Headers will be added verbatim, so beware of the risk of XSS.
 
 <verbatim>
 %TMPL:DEF{MAILIN:normal}%   * *%SUBJECT%*: %TEXT% -- %WIKIUSERNAME% - %SERVERTIME%
@@ -20,7 +22,7 @@ Each template is specified in the form of a pair of template definitions, (surro
 
 *DO NOT MODIFY THIS TOPIC*
 
-If you want to modify or add any templates, create the topic %SYSTEMWEB%.MailInContribUserTemplate. This topic is automatically included here if it exists, but it is *not* shipped with the MailInContrib. You can create this topic in individual webs, as described in %SYSTEMWEB%.SkinTemplates. In this case the template will only apply in that specific web.
+If you want to modify or add any templates, create the topic %SYSTEMWEB%.MailInContribUserTemplate. This topic is automatically included here if it exists, but it is *not* shipped with the MailInContrib. You can create this topic in individual webs, as described in %SYSTEMWEB%.SkinTemplates. In this case the template will only apply when a mail is added to that specific web.
 
 <!-- The following line includes a *template* called "MailInContribUser", which the template search rules automatically resolve to a *topic* called MailInContribUserTemplate. -->
 %TMPL:INCLUDE{"MailInContribUser"}%

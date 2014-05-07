@@ -666,7 +666,7 @@ Judy
 #include <stddisclaimer.h>
 HERE
 
-    plainText => "2B, or not 2B; that is the pencil!\n",
+    plainText => "2B, or not 2B; that is the pencil!",
 
     plainHtml =>
 '<literal><div class="foswikiMailInContribHtml"><div style="font-weight:bold"><DIV><FONT face="Georgia">Mar<em>mel</em>ade</FONT></DIV></div></div></literal>'
@@ -753,16 +753,16 @@ HERE
     </p>
   </body>
 </html>
-
 HERE
 
     textFile => <<'HERE',
 This is
  a plain
 text file!
-
 HERE
 );
+chomp( $expectedContent{htmlFile} );
+chomp( $expectedContent{textFile} );
 
 my @tests = (
     {
@@ -1160,7 +1160,7 @@ sub doOneMimeMessage {
     my $expected = $datum->{match}->{text};
     $expected = $datum->{processText}->( $this, $expected )
       if $datum->{processText};
-    $this->assert( 0, $t )
+    $this->assert( 0, "'$t' !~ '$expected'" )
       unless $t =~ s/^\Q$expected\E\s*//s;
     $this->assert( 0, $t )
       unless $t =~

@@ -35,7 +35,7 @@ use Error qw( :try );
 use Carp;
 
 our $VERSION          = '3.0';
-our $RELEASE          = '18 Jan 2010';
+our $RELEASE          = '7 May 2014';
 our $SHORTDESCRIPTION = 'Supports submissions to Foswiki via e-mail';
 
 BEGIN {
@@ -323,8 +323,9 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
 
                 print "Received mail from $sender for $web.$topic\n";
 
-                $err .= $this->_saveTopic( $user, $web, $topic, $body, $subject,
-                    \@attachments );
+                $err .=
+                  $this->_saveTopic( $user, $web, $topic, $body, $mail,
+                    $subject, \@attachments );
             }
             if ($err) {
                 $this->_onError(
@@ -629,7 +630,8 @@ sub _extractPlainTextAndAttachments {
 }
 
 sub _saveTopic {
-    my ( $this, $user, $web, $topic, $body, $subject, $attachments ) = @_;
+    my ( $this, $user, $web, $topic, $body, $mail, $subject, $attachments ) =
+      @_;
     my $err = '';
 
     my $curUser = $Foswiki::Plugins::SESSION->{user};
@@ -658,7 +660,9 @@ sub _saveTopic {
         $insert ||=
           "   * *%SUBJECT%*: %TEXT% _%WIKIUSERNAME% @ %SERVERTIME%_\n";
         $insert =~ s/%SUBJECT%/$subject/g;
-        $body   =~ s/\r//g;
+        $insert =~ s/%MAILHEADER{"?([A-Za-z0-9_-]+)"?}%/
+            $mail->header($1) ? $mail->header($1) : '' /ge;
+        $body =~ s/\r//g;
 
         my $attached = 0;
         my $atts     = '';

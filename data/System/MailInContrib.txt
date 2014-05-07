@@ -1,3 +1,4 @@
+%META:TOPICINFO{author="ProjectContributor" version="1" date="1399463625"}%
 ---+!! <nop>Mail In to Foswiki
 %SHORTDESCRIPTION%
 <a href="http://wikiring.com"><img src="%ATTACHURL%/logo.gif" style="float:right" /></a>
@@ -113,7 +114,7 @@ Example:
    folder => 'pop://example_user:password@example.com/Inbox',
    onError => 'log',
    onNoTopic => 'error',
-   onSuccess => 'log delete',
+   onSuccess => 'delete',
    topicPath => 'to subject',
    content => {
      type => 'html',
@@ -208,19 +209,19 @@ Many thanks to the following sponsors for supporting this work:
    * [[http://www.evolvedmedianetwork.com][Evolved Media Network]]
 
 |  Author: | Foswiki:Main.CrawfordCurrie (http://c-dot.co.uk) |
-|  Copyright &copy;: | 2005, TWiki Contributors<br />2008-2010 Foswiki Contributors |
+|  Copyright &copy;: | 2008-2014 Foswiki Contributors<br />2005, TWiki Contributors |
 |  License: | GPL v2 ([[http://www.gnu.org/copyleft/gpl.html][GNU General Public License]]) |
 |  Dependencies: | %$DEPENDENCIES% |
 |  Version: | %$VERSION% |
 |  Release: | %$RELEASE% |
 | Change History: | |
-| _not yet released_ | Foswikitask:Item8384: Support HTML email Foswikitask:Item8523: Add =configure= setting to ignore mail timestamp Foswikitask:Item8595: Remove the topic name from the subject |
-|  3 Feb 2009 | Foswikitask:Item456: ported Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
-|  10 Mar 2005 | 1.000 Initial version |
+|  3.0 (7 May 2014) | Foswikitask:Item8384: Support HTML email. Foswikitask:Item12890: MAILHEADER macro supports inclusion of arbitrary mail headers in the output. Foswikitask:Item8523: Add =configure= setting to ignore mail timestamp Foswikitask:Item8595: Remove the topic name from the subject. Foswikitask:Item11379: Stamp the run with the time it was started, not the time it ended, to avoid race condition on incoming mails. Foswikitask:Item8293: start id numbering at 1 for POP3. Foswikitask:Item9887: don't skip on* actions at start and end of string. |
+|  2.0 (3 Feb 2009) | Foswikitask:Item456: ported Foswikitask:Item4955: config options moved to 'Mail and Proxies' Foswikitask:Item5829: force new revision on each submission Foswikitask:Item5843: extract target topic from CC: field - general improvement to rules for extracting the target topic |
+|  1.0 (10 Mar 2005) | Initial version |
 |  Home: | Foswiki:Extensions/%TOPIC% |
 |  Support: | Foswiki:Support/%TOPIC% |
 
 __Related Topics:__ %SYSTEMWEB%.DefaultPreferences, %USERSWEB%.SitePreferences
 
-%META:FILEATTACHMENT{name="wikiringlogo20x20.png" attr="h" comment="" version="1"}%
-%META:FILEATTACHMENT{name="logo.gif" attr="h" comment="" version="1"}%
+%META:FILEATTACHMENT{name="wikiringlogo20x20.png" attr="h" comment="" version="1" date="1399463625" user="ProjectContributor"}%
+%META:FILEATTACHMENT{name="logo.gif" attr="h" comment="" version="1" date="1399463625" user="ProjectContributor"}%
