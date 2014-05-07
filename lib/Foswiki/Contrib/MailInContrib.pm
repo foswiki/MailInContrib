@@ -1,7 +1,7 @@
 #
 # Foswiki - The Free and Open Source Wiki, http://foswiki.org/
 #
-# Copyright (C) 2009 Foswiki Contributors. All Rights Reserved.
+# Copyright (C) 2009-2014 Foswiki Contributors. All Rights Reserved.
 # Foswiki Contributors are listed in the AUTHORS file in the root
 # of this distribution. NOTE: Please extend that file, not this notice.
 #
@@ -34,7 +34,7 @@ use Time::ParseDate;
 use Error qw( :try );
 use Carp;
 
-our $VERSION          = '$Rev: 10183$';
+our $VERSION          = '3.0';
 our $RELEASE          = '18 Jan 2010';
 our $SHORTDESCRIPTION = 'Supports submissions to Foswiki via e-mail';
 
@@ -47,7 +47,7 @@ BEGIN {
     package MIMEFolder;
 
     use Email::Folder;
-    our @ISA = qw(      );
+    our @ISA = qw( Email::Folder );
 
     sub bless_message {
         my $self = shift;
@@ -67,9 +67,14 @@ Construct a new inbox processor.
 
 sub new {
     my ( $class, $session, $debug ) = @_;
-    my $this = bless( {}, $class );
-    $this->{session} = $session;
-    $this->{debug}   = $debug;
+    my $this = bless(
+        {
+            session   => $session,
+            debug     => $debug,
+            startTime => time()
+        },
+        $class
+    );
 
     # Find out when we last processed mail
     my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
@@ -77,6 +82,8 @@ sub new {
         open( F, "<$workdir/timestamp" ) || die $!;
         $this->{lastMailIn} = <F>;
         chomp( $this->{lastMailIn} );
+        print STDERR "Timestamp is $this->{lastMailIn} ("
+          . Foswiki::Time::formatTime( $this->{lastMailIn} ) . ")\n";
         close(F);
     }
     else {
@@ -101,7 +108,7 @@ sub wrapUp {
     # re-stamp
     my $workdir = Foswiki::Func::getWorkArea('MailInContrib');
     open( F, ">$workdir/timestamp" ) || die $!;
-    print F time(), "\n";
+    print F $this->{startTime}, "\n";
     close(F);
 }
 
@@ -226,6 +233,10 @@ sub processInbox {
             }
         }
 
+        print STDERR "Received: $received ("
+          . Foswiki::Time::formatTime($received) . ")\n"
+          if $this->{debug};
+
         print STDERR "User is '", ( $user || 'undefined' ), "'\n"
           if ( $this->{debug} );
 
@@ -294,7 +305,6 @@ s/^(\s*(?:($Foswiki::regex{webNameRegex})\.)?($Foswiki::regex{topicNameRegex})(:
             print STDERR "Skipping; no topic\n" if ( $this->{debug} );
             next unless $topic;
         }
-
         if ( $box->{ignoreMessageTime} or $received > $this->{lastMailIn} ) {
             my $err = '';
             unless ( Foswiki::Func::webExists($web) ) {
@@ -615,7 +625,7 @@ sub _saveTopic {
         my ( $meta, $text ) = Foswiki::Func::readTopic( $web, $topic );
 
         my $opts;
-        if ( $text =~ /<!--MAIL(?:{(.*?)})?-->/ ) {
+        if ( $text && $text =~ /<!--MAIL(?:{(.*?)})?-->/ ) {
             $opts = new Foswiki::Attrs($1);
         }
         else {
