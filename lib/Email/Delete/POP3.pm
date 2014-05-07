@@ -13,7 +13,7 @@ sub delete_message {
     my $folder = new Email::Folder( $args{from} );
     my @trash;
 
-    my $num = 0;
+    my $num = 1;
     while ( my $mail = $folder->next_message() ) {
         if ( $args{matching}->($mail) ) {
             push( @trash, $num );

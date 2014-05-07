@@ -7,7 +7,7 @@ lib/Foswiki/Contrib/MailInContrib/FilterExternalResources.pm 0444 perl module
 lib/Foswiki/Contrib/MailInContrib/NoScript.pm 0444 perl module
 lib/Foswiki/Contrib/MailInContrib/NoInlineContent.pm 0444 perl module
 lib/Foswiki/Contrib/MailInContrib/Config.spec 0444 configure spec
-lib/CPAN/lib/Email/Delete/IMAP.pm 0444 Extension to incomplete CPAN module
-lib/CPAN/lib/Email/Delete/IMAPS.pm 0444 Extension to incomplete CPAN module
-lib/CPAN/lib/Email/Delete/POP3.pm 0444 Extension to incomplete CPAN module
+lib/Email/Delete/IMAP.pm 0444 Extension to incomplete CPAN module
+lib/Email/Delete/IMAPS.pm 0444 Extension to incomplete CPAN module
+lib/Email/Delete/POP3.pm 0444 Extension to incomplete CPAN module
 pub/System/MailInContrib/wikiringlogo20x20.png 0660
