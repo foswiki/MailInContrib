@@ -21,6 +21,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	id 1NaZSd-00068L-5w
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 20:51:23 +0200
 Subject: $this->{test_web}.AnotherTopic: Plain Text
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 20:51:15 +0200
@@ -60,6 +61,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 20:51:23 +0200
 Content-Type: text/plain; charset=iso-8859-15; format=flowed; delsp=yes
 Subject: $this->{test_web}.AnotherTopic: Plain Text
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 20:51:15 +0200
@@ -102,6 +104,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:06:52 +0200
 Content-Type: multipart/mixed; boundary=----------9VMjtYMKvFNX1uth9u6mzC
 Subject: $this->{test_web}.AnotherTopic: Plain Text with image attached
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "Major Dolt" <dolt@purple.net>
 Date: Thu, 28 Jan 2010 21:06:47 +0200
@@ -152,6 +155,7 @@ Content-Type: multipart/mixed; boundary=----------Wq3Fb7J0RE2crjsFpgh1Zk
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Subject: $this->{test_web}.AnotherTopic: Plain Text with text attached
+Auto-Submitted: auto-generated
 Date: Thu, 28 Jan 2010 21:11:20 +0200
 MIME-Version: 1.0
 Message-ID: <op.u69bk6swmjv6gc@michaeltempest>
@@ -187,6 +191,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:30:56 +0200
 Content-Type: multipart/mixed; boundary=----------tn4G2p9YnqHHx0HfiDh0Jj
 Subject: $this->{test_web}.AnotherTopic: Plain Text with HTML attachment
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:30:52 +0200
@@ -238,6 +243,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 20:51:23 +0200
 Content-Type: text/plain; charset=iso-8859-15; format=flowed; delsp=yes
 Subject: $this->{test_web}.AnotherTopic: Html As Plain Text
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 20:51:15 +0200
@@ -275,6 +281,7 @@ Content-Type: multipart/alternative; boundary=----------9CL0w9YQnQWV1xj9ZEirtx
 Subject:
  $this->{test_web}.AnotherTopic:
  HTML
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:38:09 +0200
@@ -318,6 +325,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:42:37 +0200
 Content-Type: multipart/alternative; boundary=----------MOQa6apUY61ka2jxRHU07U
 Subject: $this->{test_web}.AnotherTopic: HTML with inline image
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:42:32 +0200
@@ -384,6 +392,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:45:18 +0200
 Content-Type: multipart/mixed; boundary=----------jNngAQGNgFFTjLJaCpAlcI
 Subject: $this->{test_web}.AnotherTopic: HTML with image attached
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:45:14 +0200
@@ -452,6 +461,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:50:45 +0200
 Content-Type: multipart/mixed; boundary=----------Ky64u8Y5DfkBons6rsWaZz
 Subject: $this->{test_web}.AnotherTopic: HTML with text attachment
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:50:40 +0200
@@ -509,6 +519,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:53:31 +0200
 Content-Type: multipart/mixed; boundary=----------og4dYcGRJjxYLBBnMP6ekf
 Subject: $this->{test_web}.AnotherTopic: HTML with HTML attachment
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:53:27 +0200
@@ -580,6 +591,7 @@ Received: from [172.16.225.1] (helo=michaeltempest)
 	for www-data@tou810.localdomain; Thu, 28 Jan 2010 21:38:14 +0200
 Content-Type: text/html; charset=iso-8859-15
 Subject: $this->{test_web}.AnotherTopic: HTML
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:38:09 +0200
@@ -610,6 +622,7 @@ Content-Type: multipart/alternative; boundary=----------9CL0w9YQnQWV1xj9ZEirtx
 Subject:
  $this->{test_web}.AnotherTopic:
  HTML with script
+Auto-Submitted: auto-generated
 From: "Ally Gator" <ally@masai.mara>
 To: "The Wiki" <wiki@some.company>
 Date: Thu, 28 Jan 2010 21:38:09 +0200

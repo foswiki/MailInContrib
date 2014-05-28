@@ -757,6 +757,7 @@ Date: Mon, 27 Feb 2006 00:33:58 -0800
 From: "Ally Gator" <ally@masai.mara>
 To: "Dick Head" <dhead@twiki.com>
 Subject: $this->{test_web}.AnotherTopic: attachment test
+Auto-Submitted: auto-generated
 Cc: another.idiot@twiki.com
 MIME-Version: 1.0
 Content-Type: multipart/mixed; 
